@@ -266,7 +266,7 @@
 <section class="slide">
   <div class="mesh"></div>
   <div class="pad">
-    <span class="eyebrow">⇄ VERSIÓN REORDENADA (panel de jueces) · 31 en flujo + 8 de respaldo</span>
+    <span class="eyebrow">⇄ VERSIÓN REORDENADA (panel de jueces) · 33 en flujo + 6 de respaldo</span>
     <h1>Un agente de datos <b>no se configura: se construye</b></h1>
     <p class="lead">Tu agente responde mal porque nadie le explicó tu negocio. Hoy, en vivo: el fallo real y las <b>6 capas de contexto</b> que lo curan.</p>
     <div class="foot">
@@ -840,229 +840,6 @@
   <span class="kick">El stack</span><span class="pg">26 / 40</span>
 </section>
 
-<!-- 32c · ARQUITECTURA E2E · EL CAMINO DE LA PREGUNTA -->
-<section class="slide">
-  <div class="pad" style="padding-top:40px;padding-bottom:28px">
-    <span class="eyebrow">Arquitectura de punta a punta · 2 de 3</span>
-    <h2 style="font-size:36px;max-width:36ch">El camino de la pregunta: <b>qué pasa en esos 15 segundos</b></h2>
-    <div class="arch">
-      <div class="lane">
-        <div class="lb">Entrada</div>
-        <div class="row">
-          <div class="nd"><div class="t">👤 «¿Qué productos tengo que reponer?»</div><div class="c">lenguaje natural, con las palabras del negocio — no con los nombres de tus tablas</div></div>
-        </div>
-      </div>
-      <div class="lane">
-        <div class="lb">Genie</div>
-        <div class="row">
-          <div class="nd on"><div class="t">1 · Recupera el contexto</div><div class="c">las 6 capas del space + el esquema de las tablas conectadas</div></div>
-          <div class="ar">→</div>
-          <div class="nd hot"><div class="t">2 · LLM escribe el SQL</div><div class="c">🚨 acá es donde improvisa si le falta contexto</div></div>
-          <div class="ar">→</div>
-          <div class="nd on"><div class="t">3 · Reusa la trusted query</div><div class="c">si la pregunta matchea una curada, no la re-inventa</div></div>
-        </div>
-      </div>
-      <div class="lane">
-        <div class="lb">Ejecución</div>
-        <div class="row">
-          <div class="nd"><div class="t">SQL Warehouse serverless</div><div class="c">corre el SQL contra Gold — con los permisos del <b>usuario que preguntó</b>, no los del creador del space</div></div>
-          <div class="ar">→</div>
-          <div class="nd gold"><div class="t">Resultado + el SQL a la vista</div><div class="c">por eso se audita, y por eso el negocio confía</div></div>
-        </div>
-      </div>
-      <div class="lane">
-        <div class="lb">Consumo</div>
-        <div class="row">
-          <div class="nd"><div class="t">Genie App</div><div class="c">dentro de Databricks</div></div>
-          <div class="nd"><div class="t">Conversation API</div><div class="c">endpoint para cualquier app</div></div>
-          <div class="nd"><div class="t">Databricks App</div><div class="c">UI propia, mismo gobierno</div></div>
-          <div class="nd"><div class="t">MCP</div><div class="c">expone <b>solo las funciones</b></div></div>
-        </div>
-      </div>
-      <div class="band ev">
-        <span class="bt">↺ El lazo que cierra</span>
-        <span>Cada respuesta mala se convierte en una <b>trusted query</b> nueva (vuelve a la capa 3) · el <b>golden set</b> se corre en cada cambio · las <b>system tables</b> dan costo y latencia. <b>Sin este lazo no hay producto, hay una demo con suerte.</b></span>
-      </div>
-    </div>
-    <div class="foot"><span>~US$ 0,002 y ~15 s por consulta — <b>si el contexto está puesto</b></span><span>Las 3 piezas de hoy: capa semántica · evaluación · gobierno</span></div>
-  </div>
-  <span class="kick">Arquitectura e2e</span><span class="pg">27 / 40</span>
-</section>
-
-<!-- 22b · PREGUNTAS ED.1 · COSTO -->
-<section class="slide">
-  <div class="pad">
-    <span class="badge new">● Lo que preguntaron en la edición 1</span>
-    <h2>«¿Cuánto cuesta esto?» — y la respuesta sorprende <b>al revés</b></h2>
-    <div class="three">
-      <div class="piece">
-        <div class="num">POR CONSULTA</div>
-        <div class="pt" style="color:var(--deliv-tx)">~US$ 0,002</div>
-        <p>Una consulta de ~15 s sobre un warehouse a US$ 0,40/hora DBU. Dos décimas de centavo.</p>
-      </div>
-      <div class="piece">
-        <div class="num">CÓMO SE COBRA</div>
-        <div class="pt">Por <b>DBU</b>, no por token</div>
-        <p>Genie no te cobra tokens. Solo aparecen si conectas un <b>modelo externo</b>. El monitoreo sale de las <b>system tables</b>.</p>
-      </div>
-      <div class="piece">
-        <div class="num">EL COSTO REAL</div>
-        <div class="pt" style="color:var(--bad-tx)">Mal configurado</div>
-        <p>Hasta <b>1 min 30 s</b> por respuesta. El gasto no viene de las consultas: viene del warehouse encendido y de un space que tiene que adivinar.</p>
-      </div>
-    </div>
-    <div class="deliv"><span class="lbl">Lo contraintuitivo</span><span class="val">Curar el Genie no es solo una mejora de calidad: <b>un space bien configurado responde más rápido y por lo tanto cuesta menos</b>. La capa 3 se paga sola.</span></div>
-  </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">28 / 40</span>
-</section>
-
-<!-- 24b · GARTNER -->
-<section class="slide">
-  <div class="pad">
-    <span class="eyebrow">Por qué este stack y no otro</span>
-    <h2 style="font-size:34px;max-width:26ch">Databricks cruzó de «plataforma de datos» a <b>plataforma de BI</b></h2>
-    <div class="mq-split">
-      <img src="assets/gartner-mq-2026-dsml.png" alt="Gartner Magic Quadrant 2026 para AI Platforms for Data Science and Machine Learning: Databricks en el cuadrante de Líderes, el más alto en ejecución y el más a la derecha en visión">
-      <div class="pyr-txt">
-        <ul class="learn" style="margin-top:0">
-          <li><b>MQ 2026 · AI Platforms para Data Science y ML.</b> Leader, <b>el más alto en ejecución y el más lejos en visión</b> — segundo año consecutivo. Es el gráfico de la izquierda.</li>
-          <li>El cuadrante <b>cambió de nombre</b> (de «DSML» a «AI Platforms»): el mercado se movió de entrenar modelos a <b>desplegar aplicaciones agénticas gobernadas</b>.</li>
-          <li><b>MQ 2026 · Analytics &amp; BI.</b> Ahí Databricks <b>entra por primera vez</b> — otro cuadrante, otra historia. Gartner encuadra este año la BI por dar respuestas <b>conversacionales</b>, no solo tableros. Justo lo de hoy.</li>
-        </ul>
-        <div class="deliv" style="margin-top:18px"><span class="lbl">Por qué te importa</span><span class="val">El puesto que se está abriendo no es «el que hace dashboards» ni «el que entrena modelos»: es <b>el que gobierna la capa semántica</b> donde esas dos cosas se tocan.</span></div>
-      </div>
-    </div>
-  </div>
-  <span class="kick">Contexto de mercado</span><span class="pg">29 / 40</span>
-</section>
-
-<!-- 25 · EL CURSO -->
-<section class="slide">
-  <div class="mesh" style="height:32%"></div>
-  <div class="pad">
-    <span class="eyebrow">Programa de especialización · arranca el lunes 24 de agosto</span>
-    <h2><b>Databricks AI Engineer</b> — 8 sesiones, de Data Engineer a AI Engineer</h2>
-    <div class="sess">
-      <div class="s"><div class="sn">SESIÓN 1</div><div class="st">La plataforma de datos desde cero</div></div>
-      <div class="s"><div class="sn">SESIÓN 2</div><div class="st">Pipelines que alimentan la IA</div></div>
-      <div class="s"><div class="sn">SESIÓN 3</div><div class="st">Fundamentos de IA Generativa</div></div>
-      <div class="s hl"><div class="sn">SESIÓN 4</div><div class="st">RAG — el contexto de tu negocio</div></div>
-      <div class="s hl"><div class="sn">SESIÓN 5</div><div class="st">Agentes: del que responde al que actúa</div></div>
-      <div class="s hl"><div class="sn">SESIÓN 6</div><div class="st">Evaluación: cómo saber si es buena</div></div>
-      <div class="s"><div class="sn">SESIÓN 7</div><div class="st">Gobierno y guardrails</div></div>
-      <div class="s"><div class="sn">SESIÓN 8</div><div class="st">Despliegue y monitoreo</div></div>
-    </div>
-    <div class="deliv"><span class="lbl">Proyecto integrador</span><span class="val"><b>Copiloto de Datos</b> — un agente que responde sobre los datos de una empresa, construido de punta a punta. Lo de hoy es una rebanada de ese proyecto.</span></div>
-  </div>
-  <span class="kick">El programa</span><span class="pg">30 / 40</span>
-</section>
-
-<!-- 26 · PRÓXIMOS PASOS -->
-<section class="slide">
-  <div class="mesh"></div>
-  <div class="pad" style="max-width:760px">
-    <span class="eyebrow">Para cerrar</span>
-    <h2 style="max-width:20ch">Tres cosas que puedes hacer <b>esta semana</b></h2>
-    <ul class="learn" style="max-width:none">
-      <li><b>Escribe 10 COMMENT</b> en las columnas de tu tabla más consultada. Es la capa más barata y la que más se salta.</li>
-      <li><b>Arma tu set de 20 preguntas</b> con respuesta validada. Sin eso no sabes si tu agente mejora o empeora.</li>
-      <li><b>Antes de armar el segundo agente, pregúntate cuál es SU trampa.</b> No es la misma que la del primero.</li>
-    </ul>
-    <div class="cta-row" style="flex-direction:column;align-items:flex-start;gap:12px;padding:20px 26px">
-      <div class="txt" style="font-size:21px;line-height:1.3">Programa <b>Databricks AI Engineer</b> · empieza el <b>lun 24 ago</b><br><span style="font-size:14px;opacity:.75">8 sesiones en vivo · lun y mié 19:00–22:00 · proyecto «Copiloto de Datos»</span></div>
-      <span class="cta-btn" style="font-size:14px;padding:11px 20px">datahackers.ai/curso/databricks-ai-engineer</span>
-    </div>
-    <div class="foot" style="margin-top:16px"><span class="mark"><span></span> Manuel Argüelles · AI Engineer</span><span>Gracias por venir — ahora las preguntas</span></div>
-  </div>
-  <div class="qr-card" style="top:44%;width:380px;padding:24px 22px">
-    <img src="assets/qr-curso.png" alt="Código QR para inscribirse al programa Databricks AI Engineer">
-    <div class="qr-t">Inscríbete acá</div>
-    <div class="qr-s">datahackers.ai</div>
-  </div>
-  <span class="kick">Próximos pasos</span><span class="pg">31 / 40</span>
-</section>
-
-<!-- ═══ DE ACÁ EN ADELANTE: SLIDES DE RESPALDO (fuera del flujo) ═══ -->
-<section class="slide divider">
-  <div class="mesh"></div>
-  <div class="pad">
-    <span class="eyebrow">Fin del flujo principal</span>
-    <div class="phase-name" style="font-weight:300;font-size:44px;letter-spacing:-1.2px">Lo que sigue es <b style="font-weight:600">respaldo</b></div>
-    <p class="phase-line">Slides que el panel sacó del flujo pero conviene tener a mano: se muestran solo si alguien pregunta. No forman parte del recorrido.</p>
-  </div>
-  <span class="kick">Respaldo</span><span class="pg">32 / 40</span>
-</section>
-
-<!-- 03 · APERTURA · LA ESCALERA -->
-<section class="slide">
-  <div class="pad">
-    <span class="eyebrow">Esta historia la viviste, o la estás viviendo</span>
-    <h2>La escalera que <b>todos subimos</b> — y que nunca resuelve el problema</h2>
-    <div class="steps" style="margin-top:30px">
-      <span class="step">Contratan un analista</span><span class="arrow">→</span>
-      <span class="step">Hace falta un coordinador</span><span class="arrow">→</span>
-      <span class="step">Arman un datamart</span>
-    </div>
-    <div class="steps" style="margin-top:14px">
-      <span class="step">Un data warehouse</span><span class="arrow">→</span>
-      <span class="step">Migran a Databricks / Fabric / Snowflake</span><span class="arrow">→</span>
-      <span class="step on" style="background:var(--ruby);border-color:var(--ruby)">Y siguen igual</span>
-    </div>
-    <p class="lead" style="margin-top:30px">Cada escalón cuesta más que el anterior. Cada uno se vende como «la solución definitiva». Y en cada uno el problema sobrevive intacto, porque <b>nunca se gobernó el dato</b> — solo se lo mudó a un lugar más caro.</p>
-    <div class="foot"><span>Cambiar de plataforma no es cambiar de práctica</span></div>
-  </div>
-  <span class="kick">Apertura</span><span class="pg">33 / 40</span>
-</section>
-
-<!-- 22c · PREGUNTAS ED.1 · LÍMITES Y DISPONIBILIZACIÓN -->
-<section class="slide">
-  <div class="pad">
-    <span class="badge new">● Lo que preguntaron en la edición 1</span>
-    <h2>Cuántas tablas aguanta, y cómo se lo doy <b>a quien no escribe SQL</b></h2>
-    <div class="split">
-      <div class="card">
-        <div class="k">¿Hay límite de tablas?</div>
-        <div class="big">520 sin tocar techo</div>
-        <p>Es lo que llegué a cargar en un space. Pero <b>acotá igual</b>: más tablas sin instrucciones no es más cobertura, es más lentitud y más superficie para equivocarse.</p>
-        <ul><li>El límite práctico no es técnico: es <b>cuánto contexto pudiste curar</b>.</li></ul>
-      </div>
-      <div class="card">
-        <div class="k">¿Cómo lo disponibilizo?</div>
-        <div class="big">Heredando los permisos</div>
-        <ul>
-          <li>Grupos, roles y <b>RLS por país</b> en Unity Catalog — Genie los hereda, no hay que rehacerlos.</li>
-          <li>Genie App, una app propia, o un bot de mensajería.</li>
-          <li>Vía <b>MCP</b> puedes exponer <b>solo las funciones</b>, sin dar acceso al catálogo entero.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot"><span>Y la memoria: conversacional dentro de la sesión, con tope. <b>No hay memoria entre sesiones.</b></span></div>
-  </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">34 / 40</span>
-</section>
-
-<!-- 22d · PREGUNTAS ED.1 · VERSIONADO -->
-<section class="slide">
-  <div class="pad">
-    <span class="badge new">● Lo que preguntaron en la edición 1</span>
-    <h2>«¿Y esto cómo se versiona?» — la pregunta que <b>separa al que ya sufrió</b></h2>
-    <div class="steps" style="margin-top:28px">
-      <span class="step">Rama</span><span class="arrow">→</span>
-      <span class="step">Pull request</span><span class="arrow">→</span>
-      <span class="step">Tests</span><span class="arrow">→</span>
-      <span class="step">Merge</span><span class="arrow">→</span>
-      <span class="step on">GitHub Actions aplica a Databricks</span>
-    </div>
-    <ul class="learn">
-      <li>Las capas <b>son código</b>: los <code>COMMENT</code> son <code>ALTER TABLE</code>, las funciones son SQL, las constraints también. Todo eso entra a Git.</li>
-      <li><b>Sin versionado no hay rollback.</b> Y sin rollback, nadie se anima a tocar el space que ya funciona — que es como mueren estos proyectos.</li>
-      <li>Los <b>4 spaces de hoy se crearon por API</b>, no a mano. Por eso se pueden reconstruir: lo hicimos esta semana, en otra nube, y las cifras dieron iguales.</li>
-    </ul>
-    <div class="deliv"><span class="lbl">El detalle que muerde</span><span class="val">El <code>COMMENT</code> de Unity Catalog tiene un tope de <b>~255 caracteres</b>. Si tu definición de negocio no entra ahí, no va en la capa 1 — va a la 2 o a la 3.</span></div>
-  </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">35 / 40</span>
-</section>
-
 <!-- 32b · ARQUITECTURA E2E · EL CAMINO DEL DATO -->
 <section class="slide">
   <div class="pad" style="padding-top:40px;padding-bottom:28px">
@@ -1115,7 +892,56 @@
     </div>
     <div class="foot"><span>Hasta acá <b>no hay nada de IA</b> — es ingeniería de datos. La base de la pirámide del slide 04.</span></div>
   </div>
-  <span class="kick">Arquitectura e2e</span><span class="pg">36 / 40</span>
+  <span class="kick">Arquitectura e2e</span><span class="pg">27 / 40</span>
+</section>
+
+<!-- 32c · ARQUITECTURA E2E · EL CAMINO DE LA PREGUNTA -->
+<section class="slide">
+  <div class="pad" style="padding-top:40px;padding-bottom:28px">
+    <span class="eyebrow">Arquitectura de punta a punta · 2 de 3</span>
+    <h2 style="font-size:36px;max-width:36ch">El camino de la pregunta: <b>qué pasa en esos 15 segundos</b></h2>
+    <div class="arch">
+      <div class="lane">
+        <div class="lb">Entrada</div>
+        <div class="row">
+          <div class="nd"><div class="t">👤 «¿Qué productos tengo que reponer?»</div><div class="c">lenguaje natural, con las palabras del negocio — no con los nombres de tus tablas</div></div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lb">Genie</div>
+        <div class="row">
+          <div class="nd on"><div class="t">1 · Recupera el contexto</div><div class="c">las 6 capas del space + el esquema de las tablas conectadas</div></div>
+          <div class="ar">→</div>
+          <div class="nd hot"><div class="t">2 · LLM escribe el SQL</div><div class="c">🚨 acá es donde improvisa si le falta contexto</div></div>
+          <div class="ar">→</div>
+          <div class="nd on"><div class="t">3 · Reusa la trusted query</div><div class="c">si la pregunta matchea una curada, no la re-inventa</div></div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lb">Ejecución</div>
+        <div class="row">
+          <div class="nd"><div class="t">SQL Warehouse serverless</div><div class="c">corre el SQL contra Gold — con los permisos del <b>usuario que preguntó</b>, no los del creador del space</div></div>
+          <div class="ar">→</div>
+          <div class="nd gold"><div class="t">Resultado + el SQL a la vista</div><div class="c">por eso se audita, y por eso el negocio confía</div></div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lb">Consumo</div>
+        <div class="row">
+          <div class="nd"><div class="t">Genie App</div><div class="c">dentro de Databricks</div></div>
+          <div class="nd"><div class="t">Conversation API</div><div class="c">endpoint para cualquier app</div></div>
+          <div class="nd"><div class="t">Databricks App</div><div class="c">UI propia, mismo gobierno</div></div>
+          <div class="nd"><div class="t">MCP</div><div class="c">expone <b>solo las funciones</b></div></div>
+        </div>
+      </div>
+      <div class="band ev">
+        <span class="bt">↺ El lazo que cierra</span>
+        <span>Cada respuesta mala se convierte en una <b>trusted query</b> nueva (vuelve a la capa 3) · el <b>golden set</b> se corre en cada cambio · las <b>system tables</b> dan costo y latencia. <b>Sin este lazo no hay producto, hay una demo con suerte.</b></span>
+      </div>
+    </div>
+    <div class="foot"><span>~US$ 0,002 y ~15 s por consulta — <b>si el contexto está puesto</b></span><span>Las 3 piezas de hoy: capa semántica · evaluación · gobierno</span></div>
+  </div>
+  <span class="kick">Arquitectura e2e</span><span class="pg">28 / 40</span>
 </section>
 
 <!-- 32d · ARQUITECTURA E2E · LA OTRA MITAD (RAG) -->
@@ -1160,7 +986,181 @@
     </div>
     <div class="foot"><span>Sesión 4 (RAG) · sesión 5 (agentes y tools)</span><span>Y el <code>COMMENT</code> vuelve: es lo que le dice al agente <b>cuándo</b> usar cada tool</span></div>
   </div>
-  <span class="kick">Arquitectura e2e</span><span class="pg">37 / 40</span>
+  <span class="kick">Arquitectura e2e</span><span class="pg">29 / 40</span>
+</section>
+
+<!-- 22b · PREGUNTAS ED.1 · COSTO -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge new">● Lo que preguntaron en la edición 1</span>
+    <h2>«¿Cuánto cuesta esto?» — y la respuesta sorprende <b>al revés</b></h2>
+    <div class="three">
+      <div class="piece">
+        <div class="num">POR CONSULTA</div>
+        <div class="pt" style="color:var(--deliv-tx)">~US$ 0,002</div>
+        <p>Una consulta de ~15 s sobre un warehouse a US$ 0,40/hora DBU. Dos décimas de centavo.</p>
+      </div>
+      <div class="piece">
+        <div class="num">CÓMO SE COBRA</div>
+        <div class="pt">Por <b>DBU</b>, no por token</div>
+        <p>Genie no te cobra tokens. Solo aparecen si conectas un <b>modelo externo</b>. El monitoreo sale de las <b>system tables</b>.</p>
+      </div>
+      <div class="piece">
+        <div class="num">EL COSTO REAL</div>
+        <div class="pt" style="color:var(--bad-tx)">Mal configurado</div>
+        <p>Hasta <b>1 min 30 s</b> por respuesta. El gasto no viene de las consultas: viene del warehouse encendido y de un space que tiene que adivinar.</p>
+      </div>
+    </div>
+    <div class="deliv"><span class="lbl">Lo contraintuitivo</span><span class="val">Curar el Genie no es solo una mejora de calidad: <b>un space bien configurado responde más rápido y por lo tanto cuesta menos</b>. La capa 3 se paga sola.</span></div>
+  </div>
+  <span class="kick">Preguntas ed.1</span><span class="pg">30 / 40</span>
+</section>
+
+<!-- 24b · GARTNER -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Por qué este stack y no otro</span>
+    <h2 style="font-size:34px;max-width:26ch">Databricks cruzó de «plataforma de datos» a <b>plataforma de BI</b></h2>
+    <div class="mq-split">
+      <img src="assets/gartner-mq-2026-dsml.png" alt="Gartner Magic Quadrant 2026 para AI Platforms for Data Science and Machine Learning: Databricks en el cuadrante de Líderes, el más alto en ejecución y el más a la derecha en visión">
+      <div class="pyr-txt">
+        <ul class="learn" style="margin-top:0">
+          <li><b>MQ 2026 · AI Platforms para Data Science y ML.</b> Leader, <b>el más alto en ejecución y el más lejos en visión</b> — segundo año consecutivo. Es el gráfico de la izquierda.</li>
+          <li>El cuadrante <b>cambió de nombre</b> (de «DSML» a «AI Platforms»): el mercado se movió de entrenar modelos a <b>desplegar aplicaciones agénticas gobernadas</b>.</li>
+          <li><b>MQ 2026 · Analytics &amp; BI.</b> Ahí Databricks <b>entra por primera vez</b> — otro cuadrante, otra historia. Gartner encuadra este año la BI por dar respuestas <b>conversacionales</b>, no solo tableros. Justo lo de hoy.</li>
+        </ul>
+        <div class="deliv" style="margin-top:18px"><span class="lbl">Por qué te importa</span><span class="val">El puesto que se está abriendo no es «el que hace dashboards» ni «el que entrena modelos»: es <b>el que gobierna la capa semántica</b> donde esas dos cosas se tocan.</span></div>
+      </div>
+    </div>
+  </div>
+  <span class="kick">Contexto de mercado</span><span class="pg">31 / 40</span>
+</section>
+
+<!-- 25 · EL CURSO -->
+<section class="slide">
+  <div class="mesh" style="height:32%"></div>
+  <div class="pad">
+    <span class="eyebrow">Programa de especialización · arranca el lunes 24 de agosto</span>
+    <h2><b>Databricks AI Engineer</b> — 8 sesiones, de Data Engineer a AI Engineer</h2>
+    <div class="sess">
+      <div class="s"><div class="sn">SESIÓN 1</div><div class="st">La plataforma de datos desde cero</div></div>
+      <div class="s"><div class="sn">SESIÓN 2</div><div class="st">Pipelines que alimentan la IA</div></div>
+      <div class="s"><div class="sn">SESIÓN 3</div><div class="st">Fundamentos de IA Generativa</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 4</div><div class="st">RAG — el contexto de tu negocio</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 5</div><div class="st">Agentes: del que responde al que actúa</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 6</div><div class="st">Evaluación: cómo saber si es buena</div></div>
+      <div class="s"><div class="sn">SESIÓN 7</div><div class="st">Gobierno y guardrails</div></div>
+      <div class="s"><div class="sn">SESIÓN 8</div><div class="st">Despliegue y monitoreo</div></div>
+    </div>
+    <div class="deliv"><span class="lbl">Proyecto integrador</span><span class="val"><b>Copiloto de Datos</b> — un agente que responde sobre los datos de una empresa, construido de punta a punta. Lo de hoy es una rebanada de ese proyecto.</span></div>
+  </div>
+  <span class="kick">El programa</span><span class="pg">32 / 40</span>
+</section>
+
+<!-- 26 · PRÓXIMOS PASOS -->
+<section class="slide">
+  <div class="mesh"></div>
+  <div class="pad" style="max-width:760px">
+    <span class="eyebrow">Para cerrar</span>
+    <h2 style="max-width:20ch">Tres cosas que puedes hacer <b>esta semana</b></h2>
+    <ul class="learn" style="max-width:none">
+      <li><b>Escribe 10 COMMENT</b> en las columnas de tu tabla más consultada. Es la capa más barata y la que más se salta.</li>
+      <li><b>Arma tu set de 20 preguntas</b> con respuesta validada. Sin eso no sabes si tu agente mejora o empeora.</li>
+      <li><b>Antes de armar el segundo agente, pregúntate cuál es SU trampa.</b> No es la misma que la del primero.</li>
+    </ul>
+    <div class="cta-row" style="flex-direction:column;align-items:flex-start;gap:12px;padding:20px 26px">
+      <div class="txt" style="font-size:21px;line-height:1.3">Programa <b>Databricks AI Engineer</b> · empieza el <b>lun 24 ago</b><br><span style="font-size:14px;opacity:.75">8 sesiones en vivo · lun y mié 19:00–22:00 · proyecto «Copiloto de Datos»</span></div>
+      <span class="cta-btn" style="font-size:14px;padding:11px 20px">datahackers.ai/curso/databricks-ai-engineer</span>
+    </div>
+    <div class="foot" style="margin-top:16px"><span class="mark"><span></span> Manuel Argüelles · AI Engineer</span><span>Gracias por venir — ahora las preguntas</span></div>
+  </div>
+  <div class="qr-card" style="top:44%;width:380px;padding:24px 22px">
+    <img src="assets/qr-curso.png" alt="Código QR para inscribirse al programa Databricks AI Engineer">
+    <div class="qr-t">Inscríbete acá</div>
+    <div class="qr-s">datahackers.ai</div>
+  </div>
+  <span class="kick">Próximos pasos</span><span class="pg">33 / 40</span>
+</section>
+
+<!-- ═══ DE ACÁ EN ADELANTE: SLIDES DE RESPALDO (fuera del flujo) ═══ -->
+<section class="slide divider">
+  <div class="mesh"></div>
+  <div class="pad">
+    <span class="eyebrow">Fin del flujo principal</span>
+    <div class="phase-name" style="font-weight:300;font-size:44px;letter-spacing:-1.2px">Lo que sigue es <b style="font-weight:600">respaldo</b></div>
+    <p class="phase-line">Slides que el panel sacó del flujo pero conviene tener a mano: se muestran solo si alguien pregunta. No forman parte del recorrido.</p>
+  </div>
+  <span class="kick">Respaldo</span><span class="pg">34 / 40</span>
+</section>
+
+<!-- 03 · APERTURA · LA ESCALERA -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Esta historia la viviste, o la estás viviendo</span>
+    <h2>La escalera que <b>todos subimos</b> — y que nunca resuelve el problema</h2>
+    <div class="steps" style="margin-top:30px">
+      <span class="step">Contratan un analista</span><span class="arrow">→</span>
+      <span class="step">Hace falta un coordinador</span><span class="arrow">→</span>
+      <span class="step">Arman un datamart</span>
+    </div>
+    <div class="steps" style="margin-top:14px">
+      <span class="step">Un data warehouse</span><span class="arrow">→</span>
+      <span class="step">Migran a Databricks / Fabric / Snowflake</span><span class="arrow">→</span>
+      <span class="step on" style="background:var(--ruby);border-color:var(--ruby)">Y siguen igual</span>
+    </div>
+    <p class="lead" style="margin-top:30px">Cada escalón cuesta más que el anterior. Cada uno se vende como «la solución definitiva». Y en cada uno el problema sobrevive intacto, porque <b>nunca se gobernó el dato</b> — solo se lo mudó a un lugar más caro.</p>
+    <div class="foot"><span>Cambiar de plataforma no es cambiar de práctica</span></div>
+  </div>
+  <span class="kick">Apertura</span><span class="pg">35 / 40</span>
+</section>
+
+<!-- 22c · PREGUNTAS ED.1 · LÍMITES Y DISPONIBILIZACIÓN -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge new">● Lo que preguntaron en la edición 1</span>
+    <h2>Cuántas tablas aguanta, y cómo se lo doy <b>a quien no escribe SQL</b></h2>
+    <div class="split">
+      <div class="card">
+        <div class="k">¿Hay límite de tablas?</div>
+        <div class="big">520 sin tocar techo</div>
+        <p>Es lo que llegué a cargar en un space. Pero <b>acotá igual</b>: más tablas sin instrucciones no es más cobertura, es más lentitud y más superficie para equivocarse.</p>
+        <ul><li>El límite práctico no es técnico: es <b>cuánto contexto pudiste curar</b>.</li></ul>
+      </div>
+      <div class="card">
+        <div class="k">¿Cómo lo disponibilizo?</div>
+        <div class="big">Heredando los permisos</div>
+        <ul>
+          <li>Grupos, roles y <b>RLS por país</b> en Unity Catalog — Genie los hereda, no hay que rehacerlos.</li>
+          <li>Genie App, una app propia, o un bot de mensajería.</li>
+          <li>Vía <b>MCP</b> puedes exponer <b>solo las funciones</b>, sin dar acceso al catálogo entero.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot"><span>Y la memoria: conversacional dentro de la sesión, con tope. <b>No hay memoria entre sesiones.</b></span></div>
+  </div>
+  <span class="kick">Preguntas ed.1</span><span class="pg">36 / 40</span>
+</section>
+
+<!-- 22d · PREGUNTAS ED.1 · VERSIONADO -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge new">● Lo que preguntaron en la edición 1</span>
+    <h2>«¿Y esto cómo se versiona?» — la pregunta que <b>separa al que ya sufrió</b></h2>
+    <div class="steps" style="margin-top:28px">
+      <span class="step">Rama</span><span class="arrow">→</span>
+      <span class="step">Pull request</span><span class="arrow">→</span>
+      <span class="step">Tests</span><span class="arrow">→</span>
+      <span class="step">Merge</span><span class="arrow">→</span>
+      <span class="step on">GitHub Actions aplica a Databricks</span>
+    </div>
+    <ul class="learn">
+      <li>Las capas <b>son código</b>: los <code>COMMENT</code> son <code>ALTER TABLE</code>, las funciones son SQL, las constraints también. Todo eso entra a Git.</li>
+      <li><b>Sin versionado no hay rollback.</b> Y sin rollback, nadie se anima a tocar el space que ya funciona — que es como mueren estos proyectos.</li>
+      <li>Los <b>4 spaces de hoy se crearon por API</b>, no a mano. Por eso se pueden reconstruir: lo hicimos esta semana, en otra nube, y las cifras dieron iguales.</li>
+    </ul>
+    <div class="deliv"><span class="lbl">El detalle que muerde</span><span class="val">El <code>COMMENT</code> de Unity Catalog tiene un tope de <b>~255 caracteres</b>. Si tu definición de negocio no entra ahí, no va en la capa 1 — va a la 2 o a la 3.</span></div>
+  </div>
+  <span class="kick">Preguntas ed.1</span><span class="pg">37 / 40</span>
 </section>
 
 <!-- 09 · CAPA 2 -->
@@ -1311,7 +1311,7 @@
   // índice 0-based del slide -> qué abrir  (corridos +3 por el bloque de apertura)
   var CUES={
     1:{t:'<b>Arrancá con el relato, no con el temario.</b><br><span style="opacity:.7">7 % listas para IA · 5 % de las iniciativas agénticas llegan a producción. Dejá que el número respire antes de pasar.</span>',u:null},
-    32:{t:'<b>La escalera.</b> Contala como una historia, no como una lista.<br><span style="opacity:.7">Preguntá a la sala en qué escalón están. Acá es donde se enganchan.</span>',u:null},
+    34:{t:'<b>La escalera.</b> Contala como una historia, no como una lista.<br><span style="opacity:.7">Preguntá a la sala en qué escalón están. Acá es donde se enganchan.</span>',u:null},
     6:{t:'<b>Genie CRUDO</b> — preguntá:<br>«¿Cuál es el margen de la categoría Bebidas?»<br><span style="opacity:.7">🚨 NO leas el número de la slide: cambia entre corridas. Leé el que salga en pantalla.</span>',u:CRUDO},
     7:{t:'<b>Hacé la MISMA pregunta 3 veces seguidas.</b><br><span style="opacity:.7">Van a salir tres cifras distintas. Ése es el punto — no importa cuáles sean.</span>',u:CRUDO},
     10:{t:'<b>taller-v2.html</b> → pestaña <b>Las 6 capas</b><br><span style="opacity:.7">Cada capa trae su SQL copiable y sus enlaces.</span>',u:GUIA},
@@ -1327,10 +1327,10 @@
     21:{t:'<b>Genie RADAR</b> — la pregunta con sesgo:<br>«¿Qué categorías están cayendo este año?»<br><span style="opacity:.7">Responde que <b>ninguna</b>. El mejor momento del bloque: no le sigue la corriente a la pregunta.</span>',u:RADAR},
     23:{t:'<b>Terminal</b>:<br><code>cd webinar-genie-databricks-v2/scripts</code><br><code>python3 ab.py "tu pregunta"</code><br><span style="opacity:.7">Pregunta a los dos spaces a la vez y muestra el SQL. Es la Conversation API en vivo.</span>',u:null},
     2:{t:'<b>La pirámide.</b> Señalá la punta violeta y después bajá.<br><span style="opacity:.7">«Todos me piden esto (punta). Nadie me deja hacer esto (los 5 dorados).» Ahí conectás con el 7 % del slide anterior.</span>',u:null},
-    28:{t:'<b>El gráfico ya está en la slide</b> (reprint de Databricks, jun-2026).<br><span style="opacity:.7">Señalá el punto de Databricks: arriba a la derecha del todo. 🚨 Este MQ es el de <b>IA/DSML</b> (2.º año liderando). En el de <b>BI</b> es su <b>primera aparición</b> — no los mezcles. ★ abre el reprint por si querés el informe completo.</span>',u:GARTNER},
-    35:{t:'<b>Camino del dato.</b> Recorrelo de izquierda a derecha y cerrá en la banda negra.<br><span style="opacity:.7">El remate: «hasta acá no hay nada de IA». Si querés, abrí el Catalog Explorer y mostrá Gold de verdad.</span>',u:W+'/explore/data/neptuno_ai/ventas'},
-    26:{t:'<b>Camino de la pregunta.</b> Parate en el nodo violeta (paso 2).<br><span style="opacity:.7">«Acá es donde improvisa si le falta contexto» — es el Demo 0 explicado. Cerrá con el lazo verde: sin eso es una demo con suerte.</span>',u:null},
-    36:{t:'<b>La otra mitad (RAG).</b> Es el puente al curso.<br><span style="opacity:.7">Remate: «lo de hoy no es el proyecto, es <b>una de sus herramientas</b>». Y el dato que engancha: Vector Search <b>exige CDF</b>, que se prende en la sesión 2 — todo el curso está encadenado.</span>',u:null}
+    30:{t:'<b>El gráfico ya está en la slide</b> (reprint de Databricks, jun-2026).<br><span style="opacity:.7">Señalá el punto de Databricks: arriba a la derecha del todo. 🚨 Este MQ es el de <b>IA/DSML</b> (2.º año liderando). En el de <b>BI</b> es su <b>primera aparición</b> — no los mezcles. ★ abre el reprint por si querés el informe completo.</span>',u:GARTNER},
+    26:{t:'<b>Camino del dato.</b> Recorrelo de izquierda a derecha y cerrá en la banda negra.<br><span style="opacity:.7">El remate: «hasta acá no hay nada de IA». Si querés, abrí el Catalog Explorer y mostrá Gold de verdad.</span>',u:W+'/explore/data/neptuno_ai/ventas'},
+    27:{t:'<b>Camino de la pregunta.</b> Parate en el nodo violeta (paso 2).<br><span style="opacity:.7">«Acá es donde improvisa si le falta contexto» — es el Demo 0 explicado. Cerrá con el lazo verde: sin eso es una demo con suerte.</span>',u:null},
+    28:{t:'<b>La otra mitad (RAG).</b> Es el puente al curso.<br><span style="opacity:.7">Remate: «lo de hoy no es el proyecto, es <b>una de sus herramientas</b>». Y el dato que engancha: Vector Search <b>exige CDF</b>, que se prende en la sesión 2 — todo el curso está encadenado.</span>',u:null}
   };
   var slides=[].slice.call(document.querySelectorAll('.slide'));
   Object.keys(CUES).forEach(function(i){
