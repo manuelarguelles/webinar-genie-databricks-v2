@@ -7,8 +7,8 @@ Destino configurable por entorno (el default sigue siendo el sandbox v5 históri
 """
 import json, os, subprocess, sys, time
 
-WAREHOUSE = os.environ.get("GENIE_WAREHOUSE", "301ae960fc896653")
-PROFILE = os.environ.get("GENIE_PROFILE", "sandbox-v5")
+WAREHOUSE = os.environ.get("GENIE_WAREHOUSE", "2b2c1ffece1d2787")
+PROFILE = os.environ.get("GENIE_PROFILE", "webinar-aws")
 
 def sql(stmt, catalog=None, schema=None, silencioso=False):
     payload = {"warehouse_id": WAREHOUSE, "statement": stmt, "wait_timeout": "50s"}

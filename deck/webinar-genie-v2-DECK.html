@@ -106,6 +106,13 @@
   .sess .s .st{font-weight:600;font-size:14.5px;line-height:1.2;letter-spacing:-.2px;color:var(--ink)}
   .sess .s.hl{background:linear-gradient(180deg,#f3f1ff,#fff);border-color:#d8d2ff}
   .hint{font-size:12.5px;color:var(--ink-mute);margin-top:12px;font-style:italic}
+  .qr-card{position:absolute;right:76px;top:50%;transform:translateY(-50%);z-index:3;
+    display:flex;flex-direction:column;align-items:center;gap:14px;width:440px;
+    background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;
+    padding:30px 26px;box-shadow:0 8px 28px rgba(13,37,61,.10)}
+  .qr-card img{width:300px;height:300px;display:block}
+  .qr-card .qr-t{font-size:19px;font-weight:600;color:var(--ink);text-align:center;line-height:1.25}
+  .qr-card .qr-s{font-size:14px;color:var(--ink-mute);text-align:center;letter-spacing:.2px;margin-top:-8px}
   .pg{position:absolute;bottom:14px;right:28px;font-size:12px;color:var(--ink-mute);z-index:2}
   .kick{position:absolute;bottom:14px;left:76px;font-size:12px;color:var(--ink-mute);z-index:2}
   /* tabla de contraste crudo/curado */
@@ -169,23 +176,28 @@
       <span>Databricks on AWS · Unity Catalog · AI/BI Genie</span>
     </div>
   </div>
-  <span class="kick">Databricks Genie en producción · v2</span><span class="pg">01 / 26</span>
+  <span class="kick">Databricks Genie en producción · v2</span><span class="pg">01 / 27</span>
 </section>
 
 <!-- 02 · QUIÉN SOY -->
 <section class="slide">
-  <div class="pad">
+  <div class="pad" style="max-width:760px">
     <span class="eyebrow">Antes de empezar</span>
-    <h2>Construyo agentes de datos que están <b>en producción</b>, no en diapositivas</h2>
-    <ul class="learn">
+    <h2 style="max-width:15ch">Construyo agentes de datos que están <b>en producción</b></h2>
+    <ul class="learn" style="max-width:none">
       <li>AI Engineer. Trabajo en plataformas de datos y agentes que atienden usuarios reales todos los días.</li>
-      <li>Hoy no vengo a venderte que «la IA entiende tus datos». Vengo a mostrarte <b>por qué no los entiende</b> y qué se hace al respecto.</li>
-      <li>Todo lo que veas hoy es <b>en vivo</b>, sobre un workspace real y un dataset que puedes replicar. Los scripts están en un repo público.</li>
-      <li>Esta es la <b>segunda edición</b>. Todo se reconstruyó de cero en otra nube — y las cifras volvieron a dar iguales. Eso también es parte de la lección.</li>
+      <li>Hoy no vengo a venderte que «la IA entiende tus datos». Vengo a mostrarte <b>por qué no los entiende</b>.</li>
+      <li>Todo es <b>en vivo</b>, sobre un workspace real y un dataset que puedes replicar. Los scripts están en un repo público.</li>
+      <li>Esta es la <b>segunda edición</b>: se reconstruyó todo de cero en otra nube y las cifras volvieron a dar iguales.</li>
     </ul>
     <div class="foot"><span>Manuel Argüelles</span><span>Edición 2 · 14 ago 2026</span></div>
   </div>
-  <span class="kick">Presentación</span><span class="pg">02 / 26</span>
+  <div class="qr-card">
+    <img src="assets/qr-linkedin.png" alt="Código QR al perfil de LinkedIn de Manuel Argüelles">
+    <div class="qr-t">Sígueme en LinkedIn</div>
+    <div class="qr-s">manuel-arguelles-ia</div>
+  </div>
+  <span class="kick">Presentación</span><span class="pg">02 / 27</span>
 </section>
 
 <!-- 03 · LA PROMESA -->
@@ -211,7 +223,7 @@
     </div>
     <div class="foot"><span>La promesa vs. la realidad</span></div>
   </div>
-  <span class="kick">Situación</span><span class="pg">03 / 26</span>
+  <span class="kick">Situación</span><span class="pg">03 / 27</span>
 </section>
 
 <!-- 04 · DEMO 0 — el fallo -->
@@ -221,13 +233,40 @@
     <h2>Le pregunto por el margen de un modelo <b>que no tiene costos</b> — y me da un número</h2>
     <div class="chat">
       <div class="bub me"><small>Negocio</small>¿Cuál es el margen de la categoría Bebidas?</div>
-      <div class="bub ai wrong"><small>Genie · sin configurar</small>El margen total de la categoría <b>Bebidas</b> es <b>267.868,18</b>. Este valor representa la suma de los ingresos netos (después de descuentos)…</div>
-      <div class="bub me"><small>Tú, revisando</small>Eso no es el margen: es la venta neta. En este modelo <b>no existe el costo de mercadería</b>. No restó nada — le puso otro nombre a lo que sí sabía calcular.</div>
+      <div class="bub ai wrong"><small>Genie · sin configurar</small>El margen de <b>Bebidas</b> es <b>…</b> <span style="opacity:.75;font-size:13px">(el número sale en pantalla — no lo leas de esta slide)</span></div>
+      <div class="bub me"><small>Tú, revisando</small>En este modelo <b>no existe el costo de mercadería</b>. No hay ningún margen que calcular. Pero contestó igual, con total seguridad y sin una sola advertencia.</div>
     </div>
     <p class="hint">Dataset: <b>Neptuno</b> — Northwind en español. 830 pedidos · 2.155 líneas · corte 2026-05-06.</p>
     <div class="foot"><span>No calculó mal: <b>respondió una pregunta que no se podía responder</b></span></div>
   </div>
-  <span class="kick">Complicación</span><span class="pg">04 / 26</span>
+  <span class="kick">Complicación</span><span class="pg">04 / 27</span>
+</section>
+
+<!-- 04b · LA MISMA PREGUNTA, TRES VECES -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge live">● En vivo · hazlo tres veces</span>
+    <h2>La misma pregunta, tres veces seguidas. <b>Tres respuestas incompatibles.</b></h2>
+    <div class="three">
+      <div class="piece">
+        <div class="num">CORRIDA 1</div>
+        <div class="pt" style="color:var(--bad-tx)">−41.714,07</div>
+        <p>«Pérdida.» Se inventó un <b>costo estimado</b> de 309.582,25 que no existe en ninguna tabla.</p>
+      </div>
+      <div class="piece">
+        <div class="num">CORRIDA 2</div>
+        <div class="pt" style="color:var(--bad-tx)">−20.826,47</div>
+        <p>«Pérdida», otra vez — pero con otra cuenta: restó el precio histórico contra el de catálogo.</p>
+      </div>
+      <div class="piece">
+        <div class="num">CORRIDA 3</div>
+        <div class="pt" style="color:var(--bad-tx)">+267.868,18</div>
+        <p>Ahora «margen» positivo. No restó nada: es la venta neta con otra etiqueta.</p>
+      </div>
+    </div>
+    <div class="deliv"><span class="lbl">Lo que esto significa</span><span class="val">No es que dé <b>una</b> respuesta mala: es que <b>no da la misma dos veces</b>. Un número que cambia entre corridas no se audita, no se compara con el reporte oficial y no se puede defender en una reunión.</span></div>
+  </div>
+  <span class="kick">Complicación</span><span class="pg">05 / 27</span>
 </section>
 
 <!-- 05 · DIAGNÓSTICO -->
@@ -254,7 +293,7 @@
     </div>
     <div class="deliv"><span class="lbl">La tesis</span><span class="val">El modelo calcula bien lo que deduce del esquema. Lo que no puede es adivinar tu negocio — y cuando no sabe, <b>no se calla</b>.</span></div>
   </div>
-  <span class="kick">Diagnóstico</span><span class="pg">05 / 26</span>
+  <span class="kick">Diagnóstico</span><span class="pg">06 / 27</span>
 </section>
 
 <!-- 06 · TESIS -->
@@ -265,7 +304,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">El contexto no se prompt-ea:<br><b style="font-weight:600">se modela y se gobierna</b></div>
     <p class="phase-line">Seis capas, de la más barata a la que más mueve la aguja. Ninguna es magia; todas son trabajo de ingeniería de datos que ya sabes hacer.</p>
   </div>
-  <span class="kick">Tesis</span><span class="pg">06 / 26</span>
+  <span class="kick">Tesis</span><span class="pg">07 / 27</span>
 </section>
 
 <!-- 07 · MAPA -->
@@ -285,7 +324,7 @@
     </div>
     <div class="deliv"><span class="lbl">Orden recomendado</span><span class="val">Empieza por la 1 y la 2 (una tarde). La 3 se construye <b>una corrección a la vez</b>, cada vez que el Genie falla.</span></div>
   </div>
-  <span class="kick">El método</span><span class="pg">07 / 26</span>
+  <span class="kick">El método</span><span class="pg">08 / 27</span>
 </section>
 
 <!-- 08 · CAPA 1 -->
@@ -311,7 +350,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · <code>COMMENT ON COLUMN</code></span><span>Cuesta una tarde</span></div>
   </div>
-  <span class="kick">Capa 1</span><span class="pg">08 / 26</span>
+  <span class="kick">Capa 1</span><span class="pg">09 / 27</span>
 </section>
 
 <!-- 09 · CAPA 2 -->
@@ -336,7 +375,7 @@
     </div>
     <div class="foot"><span>Genie space → Configure → Instructions</span></div>
   </div>
-  <span class="kick">Capa 2</span><span class="pg">09 / 26</span>
+  <span class="kick">Capa 2</span><span class="pg">10 / 27</span>
 </section>
 
 <!-- 10 · CAPA 3 -->
@@ -365,7 +404,7 @@
     </div>
     <div class="foot"><span>Genie space → SQL queries</span><span>La capa 3 se construye con el tiempo</span></div>
   </div>
-  <span class="kick">Capa 3</span><span class="pg">10 / 26</span>
+  <span class="kick">Capa 3</span><span class="pg">11 / 27</span>
 </section>
 
 <!-- 11 · CAPA 4 -->
@@ -390,7 +429,7 @@
     </div>
     <div class="foot"><span>Genie space → Sources → Columns → Entity matching</span></div>
   </div>
-  <span class="kick">Capa 4</span><span class="pg">11 / 26</span>
+  <span class="kick">Capa 4</span><span class="pg">12 / 27</span>
 </section>
 
 <!-- 12 · CAPA 5 -->
@@ -417,7 +456,7 @@
     </div>
     <div class="foot"><span>Catalog Explorer → Functions</span><span>Verificado: devuelve 103.924,32</span></div>
   </div>
-  <span class="kick">Capa 5</span><span class="pg">12 / 26</span>
+  <span class="kick">Capa 5</span><span class="pg">13 / 27</span>
 </section>
 
 <!-- 13 · CAPA 6 -->
@@ -444,7 +483,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · PK / FK informativas</span></div>
   </div>
-  <span class="kick">Capa 6</span><span class="pg">13 / 26</span>
+  <span class="kick">Capa 6</span><span class="pg">14 / 27</span>
 </section>
 
 <!-- 14 · ANTES / DESPUÉS -->
@@ -456,14 +495,14 @@
     <div class="duel">
       <div class="h l">Genie crudo · catálogo <code>neptuno</code></div>
       <div class="h r">Genie curado · catálogo <code>neptuno_ai</code></div>
-      <div class="n l">267.868,18</div>
+      <div class="n l">Un número distinto<br>cada vez</div>
       <div class="n r">«No se puede»</div>
-      <div class="d l">Lo llama «margen» con total seguridad. Es la venta neta con otro nombre: no restó ningún costo, porque no hay ninguno que restar.</div>
+      <div class="d l">−41.714,07 · −20.826,47 · +267.868,18. Tres corridas, tres cifras, todas presentadas con total seguridad y ninguna acompañada de una advertencia.</div>
       <div class="d r">«No existe costo de mercadería ni utilidad; solo precios de venta históricos y precios de lista. ¿Quieres las ventas de Bebidas?» — y ofrece <b>103.924,32</b> con su SQL.</div>
     </div>
     <div class="deliv"><span class="lbl">Lo importante</span><span class="val">La mejor respuesta de un sistema de datos a veces es <b>«esa pregunta no se puede responder con estos datos»</b>.</span></div>
   </div>
-  <span class="kick">Resultado</span><span class="pg">14 / 26</span>
+  <span class="kick">Resultado</span><span class="pg">15 / 27</span>
 </section>
 
 <!-- 15 · PUENTE · UN GENIE NO ALCANZA -->
@@ -473,7 +512,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Un Genie curado no alcanza:<br><b style="font-weight:600">se gobierna un portafolio</b></div>
     <p class="phase-line">Las 6 capas resuelven <b>un</b> dominio. En cuanto entra el segundo — inventario, comercial, finanzas — descubres que un space que sirve para todo no sirve para nada. Cada dominio tiene sus trampas, y son distintas.</p>
   </div>
-  <span class="kick">Puente</span><span class="pg">15 / 26</span>
+  <span class="kick">Puente</span><span class="pg">16 / 27</span>
 </section>
 
 <!-- 16 · LOS 4 SPACES -->
@@ -505,7 +544,7 @@
     </div>
     <div class="deliv"><span class="lbl">La regla que aprendimos armándolos</span><span class="val">Los <code>COMMENT</code> son <b>globales al metastore</b>; las instrucciones son <b>locales al space</b>. Por eso el crudo vive en otro catálogo: si documentas <code>neptuno</code>, curas el Demo 0 sin querer.</span></div>
   </div>
-  <span class="kick">Portafolio</span><span class="pg">16 / 26</span>
+  <span class="kick">Portafolio</span><span class="pg">17 / 27</span>
 </section>
 
 <!-- 17 · CASO INVENTARIO -->
@@ -523,7 +562,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo que cuesta el error</span><span class="val">Comprar <b>8 veces</b> lo que hacía falta. Y no es un error de SQL: es una columna que nadie le explicó al modelo.</span></div>
   </div>
-  <span class="kick">Caso · Inventario</span><span class="pg">17 / 26</span>
+  <span class="kick">Caso · Inventario</span><span class="pg">18 / 27</span>
 </section>
 
 <!-- 18 · CASO RADAR -->
@@ -548,7 +587,7 @@
     </div>
     <div class="foot"><span>Curado: ventana móvil contra el máximo <code>FechaPedido</code>, nunca contra <code>CURRENT_DATE</code></span></div>
   </div>
-  <span class="kick">Caso · Radar</span><span class="pg">18 / 26</span>
+  <span class="kick">Caso · Radar</span><span class="pg">19 / 27</span>
 </section>
 
 <!-- 19 · LA PREGUNTA CON SESGO -->
@@ -566,7 +605,7 @@
     </ul>
     <div class="foot"><span>El sesgo no siempre está en el dato: a veces lo trae la pregunta</span></div>
   </div>
-  <span class="kick">Caso · Radar</span><span class="pg">19 / 26</span>
+  <span class="kick">Caso · Radar</span><span class="pg">20 / 27</span>
 </section>
 
 <!-- 20 · EVALUACIÓN -->
@@ -593,7 +632,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo que hay detrás de este webinar</span><span class="val">Las <b>21 preguntas</b> que verás hoy están ejecutadas y transcritas en un archivo del repo. Sé de antemano qué contesta cada space — <b>eso</b> es tener un set de oro.</span></div>
   </div>
-  <span class="kick">Confianza</span><span class="pg">20 / 26</span>
+  <span class="kick">Confianza</span><span class="pg">21 / 27</span>
 </section>
 
 <!-- 21 · GOBIERNO -->
@@ -619,7 +658,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · row filters · column masks · audit logs</span></div>
   </div>
-  <span class="kick">Gobierno</span><span class="pg">21 / 26</span>
+  <span class="kick">Gobierno</span><span class="pg">22 / 27</span>
 </section>
 
 <!-- 22 · CLÍMAX · CONSUMO -->
@@ -641,7 +680,7 @@
     </ul>
     <div class="deliv"><span class="lbl">Lo que acabas de ver</span><span class="val">Un portafolio de asistentes de datos gobernado, evaluado y disponible para gente que no escribe SQL.</span></div>
   </div>
-  <span class="kick">Consumo</span><span class="pg">22 / 26</span>
+  <span class="kick">Consumo</span><span class="pg">23 / 27</span>
 </section>
 
 <!-- 23 · PUENTE 2 -->
@@ -651,7 +690,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Lo que acabas de ver es<br><b style="font-weight:600">una rebanada</b> de algo más grande</div>
     <p class="phase-line">Para que esos Genies existieran, alguien tuvo que dejar los datos limpios, modelarlos, gobernarlos y desplegar la app. El chat es el 10 % visible. Debajo hay un stack completo.</p>
   </div>
-  <span class="kick">Puente</span><span class="pg">23 / 26</span>
+  <span class="kick">Puente</span><span class="pg">24 / 27</span>
 </section>
 
 <!-- 24 · EL STACK + EL CURSO -->
@@ -675,7 +714,7 @@
     <p class="lead">Hoy tocamos tres piezas de esa cadena: <b>modelado semántico</b>, <b>evaluación</b> y <b>gobierno</b>. Son exactamente las que separan un piloto bonito de algo que aguanta en producción.</p>
     <div class="foot"><span>Del dato crudo al agente en producción</span></div>
   </div>
-  <span class="kick">El stack</span><span class="pg">24 / 26</span>
+  <span class="kick">El stack</span><span class="pg">25 / 27</span>
 </section>
 
 <!-- 25 · EL CURSO -->
@@ -696,7 +735,7 @@
     </div>
     <div class="deliv"><span class="lbl">Proyecto integrador</span><span class="val"><b>Copiloto de Datos</b> — un agente que responde sobre los datos de una empresa, construido de punta a punta. Lo de hoy es una rebanada de ese proyecto.</span></div>
   </div>
-  <span class="kick">El programa</span><span class="pg">25 / 26</span>
+  <span class="kick">El programa</span><span class="pg">26 / 27</span>
 </section>
 
 <!-- 26 · PRÓXIMOS PASOS -->
@@ -716,7 +755,7 @@
     </div>
     <div class="foot"><span class="mark"><span></span> Manuel Argüelles · AI Engineer</span><span>Gracias por venir — ahora las preguntas</span></div>
   </div>
-  <span class="kick">Próximos pasos</span><span class="pg">26 / 26</span>
+  <span class="kick">Próximos pasos</span><span class="pg">27 / 27</span>
 </section>
 
 <div id="hud">P · modo presentación &nbsp;·&nbsp; ← → navegar &nbsp;·&nbsp; F pantalla completa</div>

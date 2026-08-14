@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Hace la MISMA pregunta a los dos spaces (crudo y curado) y muestra el A/B."""
-import json, subprocess, sys, time
+import json, os, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor
 
-SPACES = {"CRUDO": "01f186e8178c1752a65bae945543ad01",
-          "CURADO": "01f186ec8f4b17aba9314fd588aa839b"}
-PROFILE = "sandbox-v5"
+# Databricks on AWS (14-ago-2026). Los ids del sandbox v5 ya no existen.
+SPACES = {"CRUDO":  os.environ.get("GENIE_SPACE_CRUDO",  "01f1979ee629133bb42428d55e433cff"),
+          "CURADO": os.environ.get("GENIE_SPACE_CURADO", "01f197a3c2c51e0493319fcefc5fb835")}
+PROFILE = os.environ.get("GENIE_PROFILE", "webinar-aws")
 
 def api(metodo, ruta, payload=None):
     cmd = ["databricks", "api", metodo, ruta, "-p", PROFILE]
