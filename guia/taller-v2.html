@@ -621,8 +621,9 @@ VALORES REALES
   <div class="abq">
     <div class="pregunta"><span class="st gana">Cura</span>¿Cuál es el margen de la categoría Bebidas?</div>
     <div class="par">
-      <div class="lado mal"><div class="quien">Crudo · dos respuestas distintas</div><div class="cifra">−23.055,30 … y luego +267.868,18</div>
-        <p>La misma pregunta, dos veces, dos cifras incompatibles. La segunda es la venta neta histórica con la etiqueta «margen». Ninguna de las dos es un margen. <b>Ni siquiera es reproducible.</b></p></div>
+      <div class="lado mal"><div class="quien">Crudo · tres corridas, tres cifras</div><div class="cifra">−41.714,07 · −20.826,47 · +267.868,18</div>
+        <p>Medido el 14-ago: la misma pregunta, tres veces seguidas, tres respuestas incompatibles. Una inventó un «costo estimado» de 309.582,25 que no existe; otra restó precio histórico contra precio de catálogo; la tercera no restó nada y llamó «margen» a la venta neta. <b>Ninguna es un margen, y ni siquiera es reproducible.</b></p>
+        <p style="margin-top:10px"><b>Por qué solo falla ésta:</b> las otras cinco preguntas del A/B dan idéntico entre julio y agosto, con una migración de nube en el medio. Cuando el esquema <b>determina</b> la respuesta, el LLM converge siempre al mismo SQL. Cuando no la contiene —no hay costo de mercadería en ninguna tabla— tiene que improvisar, y cada improvisación es un sorteo. <b>La irreproducibilidad es el síntoma: si preguntás tres veces y te da tres números, esa pregunta no tiene respuesta en tus datos.</b></p></div>
       <div class="lado bien"><div class="quien">Curado</div><div class="cifra">«No puedo»</div>
         <p>Se niega, explica que falta el costo de mercadería y ofrece la venta neta —US$ 103.924,32— con su SQL trazable.</p></div>
     </div>
