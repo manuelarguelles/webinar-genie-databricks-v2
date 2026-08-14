@@ -125,6 +125,12 @@
     font-size:15px;box-shadow:0 6px 18px rgba(83,58,253,.32)}
   .pyr .top small{opacity:.85;color:#e6e2ff}
   .pyr-note{font-size:12px;color:var(--ink-mute);text-align:center;margin-top:10px;font-style:italic}
+  .pyr-split{display:grid;grid-template-columns:420px 1fr;gap:34px;align-items:center;margin-top:16px;flex:1}
+  .pyr-split img{width:100%;height:auto;display:block}
+  .pyr-txt{display:flex;flex-direction:column;justify-content:center}
+  .mq-split{display:grid;grid-template-columns:400px 1fr;gap:34px;align-items:center;margin-top:14px;flex:1;min-height:0}
+  .mq-split img{max-height:440px;width:auto;max-width:100%;display:block;margin:0 auto;
+    border:1px solid var(--hairline);border-radius:8px}
   /* ─── diagrama de arquitectura e2e ─── */
   .arch{margin-top:18px;display:flex;flex-direction:column;gap:9px}
   .lane{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:stretch}
@@ -273,19 +279,21 @@
 
 <!-- 04 · APERTURA · LA PIRÁMIDE -->
 <section class="slide">
-  <div class="pad" style="padding-top:38px;padding-bottom:28px">
+  <div class="pad" style="padding-top:38px;padding-bottom:26px">
     <span class="eyebrow">Y acá está la parte que nadie compra</span>
-    <h2 style="font-size:37px;max-width:34ch">Todo el mundo compra la punta. <b>Nadie compra la base.</b></h2>
-    <div class="pyr">
-      <div class="lv top">IA · Analítica avanzada<small>lo que todos quieren comprar</small></div>
-      <div class="lv l5">Gobierno del dato<small>el soporte estructural de todo lo de abajo</small></div>
-      <div class="lv l4">Calidad · Metadatos · Arquitectura<small>que el dato se entienda y sea confiable</small></div>
-      <div class="lv l3">Integración e interoperabilidad<small>que los sistemas se hablen</small></div>
-      <div class="lv l2">Modelado y diseño · Almacenamiento y operación · Seguridad<small>los cimientos</small></div>
-      <div class="lv l1">Todo esto es ingeniería de datos — no es IA</div>
+    <h2 style="font-size:36px;max-width:24ch">Todo el mundo compra la punta. <b>Nadie compra la base.</b></h2>
+    <div class="pyr-split">
+      <img src="assets/piramide-dama-dmbok.png" alt="Pirámide DAMA-DMBOK: Data Governance en la base, Data Analytics y Big Data en la punta">
+      <div class="pyr-txt">
+        <ul class="learn" style="margin-top:0">
+          <li>Arriba, en rojo: <b>Data Analytics &amp; Big Data</b>. Es lo único que te piden — y lo único que se compra.</li>
+          <li>Abajo de todo, sosteniendo la pirámide entera: <b>Data Governance</b>. Nadie pone presupuesto ahí.</li>
+          <li>En el medio, todo lo que hay que construir antes: calidad, metadatos, arquitectura, seguridad, modelado, integración.</li>
+        </ul>
+        <div class="deliv" style="margin-top:20px"><span class="lbl">El punto</span><span class="val">Comprar la punta sin construir la base <b>es exactamente el 7 %</b>. Hoy construimos un pedazo de esa base — y vas a ver en vivo qué pasa cuando falta.</span></div>
+        <p class="pyr-note" style="text-align:left;margin-top:12px">Marco <b>DAMA-DMBOK</b> · pirámide de <b>Peter Aiken</b></p>
+      </div>
     </div>
-    <p class="pyr-note">Pirámide de <b>Peter Aiken</b> sobre el marco <b>DAMA-DMBOK</b> · redibujada</p>
-    <div class="deliv" style="margin-top:14px"><span class="lbl">El punto</span><span class="val">Comprar la punta sin construir la base <b>es exactamente el 7 %</b>. Hoy construimos un pedazo de esa base — y vas a ver en vivo qué pasa cuando falta.</span></div>
   </div>
   <span class="kick">Apertura</span><span class="pg">04 / 37</span>
 </section>
@@ -908,21 +916,18 @@
 <section class="slide">
   <div class="pad">
     <span class="eyebrow">Por qué este stack y no otro</span>
-    <h2>Databricks cruzó de «plataforma de datos» a <b>plataforma de BI</b> — y el mercado lo registró</h2>
-    <div class="cols">
-      <div class="card hot">
-        <div class="k">Gartner MQ 2026 · AI Platforms for Data Science &amp; ML</div>
-        <div class="big">Leader — el más alto en ejecución<br>y el más lejos en visión</div>
-        <p>Segundo año consecutivo en esa posición. El cambio de nombre del cuadrante (de «DSML» a «AI Platforms») dice hacia dónde se movió el mercado: de entrenar modelos a <b>desplegar aplicaciones agénticas gobernadas</b>.</p>
-      </div>
-      <div class="card">
-        <div class="k">Gartner MQ 2026 · Analytics &amp; BI Platforms</div>
-        <div class="big">Entra por primera vez</div>
-        <p>Debuta en el cuadrante de BI. Gartner encuadra este año a las plataformas de BI por su capacidad de dar respuestas <b>conversacionales</b>, no solo tableros — que es exactamente lo que hicimos hoy.</p>
-        <ul><li>Un analista independiente lo describió como <b>la mejor posición de entrada</b> que vio en un MQ.</li></ul>
+    <h2 style="font-size:34px;max-width:26ch">Databricks cruzó de «plataforma de datos» a <b>plataforma de BI</b></h2>
+    <div class="mq-split">
+      <img src="assets/gartner-mq-2026-dsml.png" alt="Gartner Magic Quadrant 2026 para AI Platforms for Data Science and Machine Learning: Databricks en el cuadrante de Líderes, el más alto en ejecución y el más a la derecha en visión">
+      <div class="pyr-txt">
+        <ul class="learn" style="margin-top:0">
+          <li><b>MQ 2026 · AI Platforms para Data Science y ML.</b> Leader, <b>el más alto en ejecución y el más lejos en visión</b> — segundo año consecutivo. Es el gráfico de la izquierda.</li>
+          <li>El cuadrante <b>cambió de nombre</b> (de «DSML» a «AI Platforms»): el mercado se movió de entrenar modelos a <b>desplegar aplicaciones agénticas gobernadas</b>.</li>
+          <li><b>MQ 2026 · Analytics &amp; BI.</b> Ahí Databricks <b>entra por primera vez</b> — otro cuadrante, otra historia. Gartner encuadra este año la BI por dar respuestas <b>conversacionales</b>, no solo tableros. Justo lo de hoy.</li>
+        </ul>
+        <div class="deliv" style="margin-top:18px"><span class="lbl">Por qué te importa</span><span class="val">El puesto que se está abriendo no es «el que hace dashboards» ni «el que entrena modelos»: es <b>el que gobierna la capa semántica</b> donde esas dos cosas se tocan.</span></div>
       </div>
     </div>
-    <div class="deliv"><span class="lbl">Por qué te importa a vos</span><span class="val">El puesto de trabajo que se está abriendo no es «el que hace dashboards» ni «el que entrena modelos»: es <b>el que gobierna la capa semántica</b> donde esas dos cosas se tocan.</span></div>
   </div>
   <span class="kick">Contexto de mercado</span><span class="pg">32 / 37</span>
 </section>
@@ -1180,7 +1185,7 @@
     21:{t:'<b>Genie RADAR</b> — la pregunta con sesgo:<br>«¿Qué categorías están cayendo este año?»<br><span style="opacity:.7">Responde que <b>ninguna</b>. El mejor momento del bloque: no le sigue la corriente a la pregunta.</span>',u:RADAR},
     28:{t:'<b>Terminal</b>:<br><code>cd webinar-genie-databricks-v2/scripts</code><br><code>python3 ab.py "tu pregunta"</code><br><span style="opacity:.7">Pregunta a los dos spaces a la vez y muestra el SQL. Es la Conversation API en vivo.</span>',u:null},
     3:{t:'<b>La pirámide.</b> Señalá la punta violeta y después bajá.<br><span style="opacity:.7">«Todos me piden esto (punta). Nadie me deja hacer esto (los 5 dorados).» Ahí conectás con el 7 % del slide anterior.</span>',u:null},
-    31:{t:'<b>Reprint oficial de Gartner</b> (Databricks).<br><span style="opacity:.7">Abrilo para mostrar el gráfico real del cuadrante. 🚨 El MQ donde Databricks está más alto es el de <b>IA/DSML</b> (2.º año); en el de <b>BI</b> es su <b>primera aparición</b>. No los mezcles.</span>',u:GARTNER},
+    31:{t:'<b>El gráfico ya está en la slide</b> (reprint de Databricks, jun-2026).<br><span style="opacity:.7">Señalá el punto de Databricks: arriba a la derecha del todo. 🚨 Este MQ es el de <b>IA/DSML</b> (2.º año liderando). En el de <b>BI</b> es su <b>primera aparición</b> — no los mezcles. ★ abre el reprint por si querés el informe completo.</span>',u:GARTNER},
     32:{t:'<b>Camino del dato.</b> Recorrelo de izquierda a derecha y cerrá en la banda negra.<br><span style="opacity:.7">El remate: «hasta acá no hay nada de IA». Si querés, abrí el Catalog Explorer y mostrá Gold de verdad.</span>',u:W+'/explore/data/neptuno_ai/ventas'},
     33:{t:'<b>Camino de la pregunta.</b> Parate en el nodo violeta (paso 2).<br><span style="opacity:.7">«Acá es donde improvisa si le falta contexto» — es el Demo 0 explicado. Cerrá con el lazo verde: sin eso es una demo con suerte.</span>',u:null},
     34:{t:'<b>La otra mitad (RAG).</b> Es el puente al curso.<br><span style="opacity:.7">Remate: «lo de hoy no es el proyecto, es <b>una de sus herramientas</b>». Y el dato que engancha: Vector Search <b>exige CDF</b>, que se prende en la sesión 2 — todo el curso está encadenado.</span>',u:null}
