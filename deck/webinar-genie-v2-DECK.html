@@ -128,8 +128,11 @@
   /* ─── diagrama de arquitectura e2e ─── */
   .arch{margin-top:18px;display:flex;flex-direction:column;gap:9px}
   .lane{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:stretch}
-  .lane .lb{display:flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:1px;
+  .lane .lb{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+    font-size:10.5px;font-weight:700;letter-spacing:1px;
     text-transform:uppercase;color:var(--ink-mute);line-height:1.25}
+  .lane .lb .ses{font-size:10px;font-weight:500;letter-spacing:0;text-transform:none;
+    color:var(--primary);margin-top:3px}
   .lane .row{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
   .nd{flex:1;background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:9px;
     padding:9px 11px;display:flex;flex-direction:column;justify-content:center;min-width:0}
@@ -220,7 +223,7 @@
       <span>Databricks on AWS · Unity Catalog · AI/BI Genie</span>
     </div>
   </div>
-  <span class="kick">Databricks Genie en producción · v2</span><span class="pg">01 / 36</span>
+  <span class="kick">Databricks Genie en producción · v2</span><span class="pg">01 / 37</span>
 </section>
 
 <!-- 02 · APERTURA · EL NÚMERO -->
@@ -244,7 +247,7 @@
     </div>
     <div class="deliv"><span class="lbl">La pregunta de hoy</span><span class="val">Si la tecnología es la misma para todos — <b>¿qué tienen las que sí llegan?</b> Los dos estudios contestan lo mismo: el obstáculo no es tecnológico, es <b>gobierno del dato</b>.</span></div>
   </div>
-  <span class="kick">Apertura</span><span class="pg">02 / 36</span>
+  <span class="kick">Apertura</span><span class="pg">02 / 37</span>
 </section>
 
 <!-- 03 · APERTURA · LA ESCALERA -->
@@ -265,7 +268,7 @@
     <p class="lead" style="margin-top:30px">Cada escalón cuesta más que el anterior. Cada uno se vende como «la solución definitiva». Y en cada uno el problema sobrevive intacto, porque <b>nunca se gobernó el dato</b> — solo se lo mudó a un lugar más caro.</p>
     <div class="foot"><span>Cambiar de plataforma no es cambiar de práctica</span></div>
   </div>
-  <span class="kick">Apertura</span><span class="pg">03 / 36</span>
+  <span class="kick">Apertura</span><span class="pg">03 / 37</span>
 </section>
 
 <!-- 04 · APERTURA · LA PIRÁMIDE -->
@@ -284,7 +287,7 @@
     <p class="pyr-note">Pirámide de <b>Peter Aiken</b> sobre el marco <b>DAMA-DMBOK</b> · redibujada</p>
     <div class="deliv" style="margin-top:14px"><span class="lbl">El punto</span><span class="val">Comprar la punta sin construir la base <b>es exactamente el 7 %</b>. Hoy construimos un pedazo de esa base — y vas a ver en vivo qué pasa cuando falta.</span></div>
   </div>
-  <span class="kick">Apertura</span><span class="pg">04 / 36</span>
+  <span class="kick">Apertura</span><span class="pg">04 / 37</span>
 </section>
 
 <!-- 05 · QUIÉN SOY -->
@@ -305,7 +308,7 @@
     <div class="qr-t">Sígueme en LinkedIn</div>
     <div class="qr-s">manuel-arguelles-ia</div>
   </div>
-  <span class="kick">Presentación</span><span class="pg">05 / 36</span>
+  <span class="kick">Presentación</span><span class="pg">05 / 37</span>
 </section>
 
 <!-- 03 · LA PROMESA -->
@@ -331,7 +334,7 @@
     </div>
     <div class="foot"><span>La promesa vs. la realidad</span></div>
   </div>
-  <span class="kick">Situación</span><span class="pg">06 / 36</span>
+  <span class="kick">Situación</span><span class="pg">06 / 37</span>
 </section>
 
 <!-- 04 · DEMO 0 — el fallo -->
@@ -347,7 +350,7 @@
     <p class="hint">Dataset: <b>Neptuno</b> — Northwind en español. 830 pedidos · 2.155 líneas · corte 2026-05-06.</p>
     <div class="foot"><span>No calculó mal: <b>respondió una pregunta que no se podía responder</b></span></div>
   </div>
-  <span class="kick">Complicación</span><span class="pg">07 / 36</span>
+  <span class="kick">Complicación</span><span class="pg">07 / 37</span>
 </section>
 
 <!-- 04b · LA MISMA PREGUNTA, TRES VECES -->
@@ -374,7 +377,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo que esto significa</span><span class="val">No es que dé <b>una</b> respuesta mala: es que <b>no da la misma dos veces</b>. Un número que cambia entre corridas no se audita, no se compara con el reporte oficial y no se puede defender en una reunión.</span></div>
   </div>
-  <span class="kick">Complicación</span><span class="pg">08 / 36</span>
+  <span class="kick">Complicación</span><span class="pg">08 / 37</span>
 </section>
 
 <!-- 05 · DIAGNÓSTICO -->
@@ -401,7 +404,7 @@
     </div>
     <div class="deliv"><span class="lbl">La tesis</span><span class="val">El modelo calcula bien lo que deduce del esquema. Lo que no puede es adivinar tu negocio — y cuando no sabe, <b>no se calla</b>.</span></div>
   </div>
-  <span class="kick">Diagnóstico</span><span class="pg">09 / 36</span>
+  <span class="kick">Diagnóstico</span><span class="pg">09 / 37</span>
 </section>
 
 <!-- 06 · TESIS -->
@@ -412,7 +415,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">El contexto no se prompt-ea:<br><b style="font-weight:600">se modela y se gobierna</b></div>
     <p class="phase-line">Seis capas, de la más barata a la que más mueve la aguja. Ninguna es magia; todas son trabajo de ingeniería de datos que ya sabes hacer.</p>
   </div>
-  <span class="kick">Tesis</span><span class="pg">10 / 36</span>
+  <span class="kick">Tesis</span><span class="pg">10 / 37</span>
 </section>
 
 <!-- 07 · MAPA -->
@@ -432,7 +435,7 @@
     </div>
     <div class="deliv"><span class="lbl">Orden recomendado</span><span class="val">Empieza por la 1 y la 2 (una tarde). La 3 se construye <b>una corrección a la vez</b>, cada vez que el Genie falla.</span></div>
   </div>
-  <span class="kick">El método</span><span class="pg">11 / 36</span>
+  <span class="kick">El método</span><span class="pg">11 / 37</span>
 </section>
 
 <!-- 08 · CAPA 1 -->
@@ -458,7 +461,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · <code>COMMENT ON COLUMN</code></span><span>Cuesta una tarde</span></div>
   </div>
-  <span class="kick">Capa 1</span><span class="pg">12 / 36</span>
+  <span class="kick">Capa 1</span><span class="pg">12 / 37</span>
 </section>
 
 <!-- 09 · CAPA 2 -->
@@ -483,7 +486,7 @@
     </div>
     <div class="foot"><span>Genie space → Configure → Instructions</span></div>
   </div>
-  <span class="kick">Capa 2</span><span class="pg">13 / 36</span>
+  <span class="kick">Capa 2</span><span class="pg">13 / 37</span>
 </section>
 
 <!-- 10 · CAPA 3 -->
@@ -512,7 +515,7 @@
     </div>
     <div class="foot"><span>Genie space → SQL queries</span><span>La capa 3 se construye con el tiempo</span></div>
   </div>
-  <span class="kick">Capa 3</span><span class="pg">14 / 36</span>
+  <span class="kick">Capa 3</span><span class="pg">14 / 37</span>
 </section>
 
 <!-- 11 · CAPA 4 -->
@@ -537,7 +540,7 @@
     </div>
     <div class="foot"><span>Genie space → Sources → Columns → Entity matching</span></div>
   </div>
-  <span class="kick">Capa 4</span><span class="pg">15 / 36</span>
+  <span class="kick">Capa 4</span><span class="pg">15 / 37</span>
 </section>
 
 <!-- 12 · CAPA 5 -->
@@ -564,7 +567,7 @@
     </div>
     <div class="foot"><span>Catalog Explorer → Functions</span><span>Verificado: devuelve 103.924,32</span></div>
   </div>
-  <span class="kick">Capa 5</span><span class="pg">16 / 36</span>
+  <span class="kick">Capa 5</span><span class="pg">16 / 37</span>
 </section>
 
 <!-- 13 · CAPA 6 -->
@@ -591,7 +594,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · PK / FK informativas</span></div>
   </div>
-  <span class="kick">Capa 6</span><span class="pg">17 / 36</span>
+  <span class="kick">Capa 6</span><span class="pg">17 / 37</span>
 </section>
 
 <!-- 14 · ANTES / DESPUÉS -->
@@ -610,7 +613,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo importante</span><span class="val">La mejor respuesta de un sistema de datos a veces es <b>«esa pregunta no se puede responder con estos datos»</b>.</span></div>
   </div>
-  <span class="kick">Resultado</span><span class="pg">18 / 36</span>
+  <span class="kick">Resultado</span><span class="pg">18 / 37</span>
 </section>
 
 <!-- 15 · PUENTE · UN GENIE NO ALCANZA -->
@@ -620,7 +623,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Un Genie curado no alcanza:<br><b style="font-weight:600">se gobierna un portafolio</b></div>
     <p class="phase-line">Las 6 capas resuelven <b>un</b> dominio. En cuanto entra el segundo — inventario, comercial, finanzas — descubres que un space que sirve para todo no sirve para nada. Cada dominio tiene sus trampas, y son distintas.</p>
   </div>
-  <span class="kick">Puente</span><span class="pg">19 / 36</span>
+  <span class="kick">Puente</span><span class="pg">19 / 37</span>
 </section>
 
 <!-- 16 · LOS 4 SPACES -->
@@ -652,7 +655,7 @@
     </div>
     <div class="deliv"><span class="lbl">La regla que aprendimos armándolos</span><span class="val">Los <code>COMMENT</code> son <b>globales al metastore</b>; las instrucciones son <b>locales al space</b>. Por eso el crudo vive en otro catálogo: si documentas <code>neptuno</code>, curas el Demo 0 sin querer.</span></div>
   </div>
-  <span class="kick">Portafolio</span><span class="pg">20 / 36</span>
+  <span class="kick">Portafolio</span><span class="pg">20 / 37</span>
 </section>
 
 <!-- 17 · CASO INVENTARIO -->
@@ -670,7 +673,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo que cuesta el error</span><span class="val">Comprar <b>8 veces</b> lo que hacía falta. Y no es un error de SQL: es una columna que nadie le explicó al modelo.</span></div>
   </div>
-  <span class="kick">Caso · Inventario</span><span class="pg">21 / 36</span>
+  <span class="kick">Caso · Inventario</span><span class="pg">21 / 37</span>
 </section>
 
 <!-- 18 · CASO RADAR -->
@@ -695,7 +698,7 @@
     </div>
     <div class="foot"><span>Curado: ventana móvil contra el máximo <code>FechaPedido</code>, nunca contra <code>CURRENT_DATE</code></span></div>
   </div>
-  <span class="kick">Caso · Radar</span><span class="pg">22 / 36</span>
+  <span class="kick">Caso · Radar</span><span class="pg">22 / 37</span>
 </section>
 
 <!-- 19 · LA PREGUNTA CON SESGO -->
@@ -713,7 +716,7 @@
     </ul>
     <div class="foot"><span>El sesgo no siempre está en el dato: a veces lo trae la pregunta</span></div>
   </div>
-  <span class="kick">Caso · Radar</span><span class="pg">23 / 36</span>
+  <span class="kick">Caso · Radar</span><span class="pg">23 / 37</span>
 </section>
 
 <!-- 20 · EVALUACIÓN -->
@@ -740,7 +743,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo que hay detrás de este webinar</span><span class="val">Las <b>21 preguntas</b> que verás hoy están ejecutadas y transcritas en un archivo del repo. Sé de antemano qué contesta cada space — <b>eso</b> es tener un set de oro.</span></div>
   </div>
-  <span class="kick">Confianza</span><span class="pg">24 / 36</span>
+  <span class="kick">Confianza</span><span class="pg">24 / 37</span>
 </section>
 
 <!-- 21 · GOBIERNO -->
@@ -766,7 +769,7 @@
     </div>
     <div class="foot"><span>Unity Catalog · row filters · column masks · audit logs</span></div>
   </div>
-  <span class="kick">Gobierno</span><span class="pg">25 / 36</span>
+  <span class="kick">Gobierno</span><span class="pg">25 / 37</span>
 </section>
 
 <!-- 22b · PREGUNTAS ED.1 · COSTO -->
@@ -793,7 +796,7 @@
     </div>
     <div class="deliv"><span class="lbl">Lo contraintuitivo</span><span class="val">Curar el Genie no es solo una mejora de calidad: <b>un space bien configurado responde más rápido y por lo tanto cuesta menos</b>. La capa 3 se paga sola.</span></div>
   </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">26 / 36</span>
+  <span class="kick">Preguntas ed.1</span><span class="pg">26 / 37</span>
 </section>
 
 <!-- 22c · PREGUNTAS ED.1 · LÍMITES Y DISPONIBILIZACIÓN -->
@@ -820,7 +823,7 @@
     </div>
     <div class="foot"><span>Y la memoria: conversacional dentro de la sesión, con tope. <b>No hay memoria entre sesiones.</b></span></div>
   </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">27 / 36</span>
+  <span class="kick">Preguntas ed.1</span><span class="pg">27 / 37</span>
 </section>
 
 <!-- 22d · PREGUNTAS ED.1 · VERSIONADO -->
@@ -842,7 +845,7 @@
     </ul>
     <div class="deliv"><span class="lbl">El detalle que muerde</span><span class="val">El <code>COMMENT</code> de Unity Catalog tiene un tope de <b>~255 caracteres</b>. Si tu definición de negocio no entra ahí, no va en la capa 1 — va a la 2 o a la 3.</span></div>
   </div>
-  <span class="kick">Preguntas ed.1</span><span class="pg">28 / 36</span>
+  <span class="kick">Preguntas ed.1</span><span class="pg">28 / 37</span>
 </section>
 
 <!-- 22 · CLÍMAX · CONSUMO -->
@@ -864,7 +867,7 @@
     </ul>
     <div class="deliv"><span class="lbl">Lo que acabas de ver</span><span class="val">Un portafolio de asistentes de datos gobernado, evaluado y disponible para gente que no escribe SQL.</span></div>
   </div>
-  <span class="kick">Consumo</span><span class="pg">29 / 36</span>
+  <span class="kick">Consumo</span><span class="pg">29 / 37</span>
 </section>
 
 <!-- 23 · PUENTE 2 -->
@@ -874,7 +877,7 @@
     <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Lo que acabas de ver es<br><b style="font-weight:600">una rebanada</b> de algo más grande</div>
     <p class="phase-line">Para que esos Genies existieran, alguien tuvo que dejar los datos limpios, modelarlos, gobernarlos y desplegar la app. El chat es el 10 % visible. Debajo hay un stack completo.</p>
   </div>
-  <span class="kick">Puente</span><span class="pg">30 / 36</span>
+  <span class="kick">Puente</span><span class="pg">30 / 37</span>
 </section>
 
 <!-- 24 · EL STACK + EL CURSO -->
@@ -898,7 +901,7 @@
     <p class="lead">Hoy tocamos tres piezas de esa cadena: <b>modelado semántico</b>, <b>evaluación</b> y <b>gobierno</b>. Son exactamente las que separan un piloto bonito de algo que aguanta en producción.</p>
     <div class="foot"><span>Del dato crudo al agente en producción</span></div>
   </div>
-  <span class="kick">El stack</span><span class="pg">31 / 36</span>
+  <span class="kick">El stack</span><span class="pg">31 / 37</span>
 </section>
 
 <!-- 24b · GARTNER -->
@@ -921,13 +924,13 @@
     </div>
     <div class="deliv"><span class="lbl">Por qué te importa a vos</span><span class="val">El puesto de trabajo que se está abriendo no es «el que hace dashboards» ni «el que entrena modelos»: es <b>el que gobierna la capa semántica</b> donde esas dos cosas se tocan.</span></div>
   </div>
-  <span class="kick">Contexto de mercado</span><span class="pg">32 / 36</span>
+  <span class="kick">Contexto de mercado</span><span class="pg">32 / 37</span>
 </section>
 
 <!-- 32b · ARQUITECTURA E2E · EL CAMINO DEL DATO -->
 <section class="slide">
   <div class="pad" style="padding-top:40px;padding-bottom:28px">
-    <span class="eyebrow">Arquitectura de punta a punta · 1 de 2</span>
+    <span class="eyebrow">Arquitectura de punta a punta · 1 de 3</span>
     <h2 style="font-size:36px;max-width:34ch">El camino del dato: de la fuente <b>a algo que se puede preguntar</b></h2>
     <div class="arch">
       <div class="lane">
@@ -939,17 +942,17 @@
         </div>
       </div>
       <div class="lane">
-        <div class="lb">Ingesta</div>
+        <div class="lb">Ingesta<span class="ses">sesión 2</span></div>
         <div class="row">
-          <div class="nd on"><div class="t">Auto Loader</div><div class="c">archivos que llegan solos, incremental</div></div>
+          <div class="nd on"><div class="t">Volumes</div><div class="c">landing gobernada dentro de Unity Catalog</div></div>
           <div class="ar">→</div>
-          <div class="nd on"><div class="t">LakeFlow / conectores</div><div class="c">réplica desde la fuente</div></div>
+          <div class="nd on"><div class="t">Auto Loader</div><div class="c">ingesta <b>incremental</b>: procesa solo lo que llegó nuevo</div></div>
           <div class="ar">→</div>
-          <div class="nd on"><div class="t">Volumes</div><div class="c">landing gobernada</div></div>
+          <div class="nd on"><div class="t">Change Data Feed</div><div class="c">qué cambió desde la última corrida</div></div>
         </div>
       </div>
       <div class="lane">
-        <div class="lb">Lakehouse<br>medallion</div>
+        <div class="lb">Lakehouse<span class="ses">DLT + Jobs · sesión 2</span></div>
         <div class="row">
           <div class="nd"><div class="t">🥉 Bronze</div><div class="c">crudo, tal cual llegó, sin tocar</div></div>
           <div class="ar">→</div>
@@ -976,13 +979,13 @@
     </div>
     <div class="foot"><span>Hasta acá <b>no hay nada de IA</b> — es ingeniería de datos. La base de la pirámide del slide 04.</span></div>
   </div>
-  <span class="kick">Arquitectura e2e</span><span class="pg">33 / 36</span>
+  <span class="kick">Arquitectura e2e</span><span class="pg">33 / 37</span>
 </section>
 
 <!-- 32c · ARQUITECTURA E2E · EL CAMINO DE LA PREGUNTA -->
 <section class="slide">
   <div class="pad" style="padding-top:40px;padding-bottom:28px">
-    <span class="eyebrow">Arquitectura de punta a punta · 2 de 2</span>
+    <span class="eyebrow">Arquitectura de punta a punta · 2 de 3</span>
     <h2 style="font-size:36px;max-width:36ch">El camino de la pregunta: <b>qué pasa en esos 15 segundos</b></h2>
     <div class="arch">
       <div class="lane">
@@ -1025,7 +1028,52 @@
     </div>
     <div class="foot"><span>~US$ 0,002 y ~15 s por consulta — <b>si el contexto está puesto</b></span><span>Las 3 piezas de hoy: capa semántica · evaluación · gobierno</span></div>
   </div>
-  <span class="kick">Arquitectura e2e</span><span class="pg">34 / 36</span>
+  <span class="kick">Arquitectura e2e</span><span class="pg">34 / 37</span>
+</section>
+
+<!-- 32d · ARQUITECTURA E2E · LA OTRA MITAD (RAG) -->
+<section class="slide">
+  <div class="pad" style="padding-top:40px;padding-bottom:28px">
+    <span class="eyebrow">Arquitectura de punta a punta · 3 de 3</span>
+    <h2 style="font-size:36px;max-width:36ch">Genie responde sobre <b>tablas</b>. La otra mitad del negocio vive en <b>documentos</b>.</h2>
+    <div class="arch">
+      <div class="lane">
+        <div class="lb">No<br>estructurado</div>
+        <div class="row">
+          <div class="nd"><div class="t">📄 Contratos · políticas · manuales</div><div class="c">PDFs en Volumes</div></div>
+          <div class="ar">→</div>
+          <div class="nd on"><div class="t">ai_parse_document</div><div class="c">el PDF se vuelve texto</div></div>
+          <div class="ar">→</div>
+          <div class="nd on"><div class="t">Chunking semántico</div><div class="c">cortar por sentido, no por caracteres</div></div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lb">Retrieval</div>
+        <div class="row">
+          <div class="nd on"><div class="t">Embeddings</div><div class="c">cada chunk como vector</div></div>
+          <div class="ar">→</div>
+          <div class="nd on"><div class="t">Mosaic AI Vector Search</div><div class="c">🔑 <b>requiere Change Data Feed</b> — por eso se prende en la sesión 2</div></div>
+          <div class="ar">→</div>
+          <div class="nd on"><div class="t">Híbrida + reranking</div><div class="c">vectorial y por palabra; reordenar contra «lost in the middle»</div></div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lb">El agente<br>que decide</div>
+        <div class="row">
+          <div class="nd hot"><div class="t">🛠 Genie Space como <b>tool</b></div><div class="c">las cifras — lo que construimos hoy</div></div>
+          <div class="nd hot"><div class="t">🛠 Vector Search como tool</div><div class="c">los documentos</div></div>
+          <div class="nd hot"><div class="t">🛠 UC Functions como tools</div><div class="c">los cálculos verificados</div></div>
+          <div class="nd hot"><div class="t">🛠 MCP</div><div class="c">lo de afuera</div></div>
+        </div>
+      </div>
+      <div class="band ev">
+        <span class="bt">El «Copiloto de Datos»</span>
+        <span>El agente <b>elige qué herramienta usar</b> según la pregunta: «¿cuánto vendimos?» va al Genie · «¿qué dice el contrato?» va al retrieval · «calculá la venta neta» va a la función. <b>Lo de hoy no es el proyecto: es una de sus herramientas.</b></span>
+      </div>
+    </div>
+    <div class="foot"><span>Sesión 4 (RAG) · sesión 5 (agentes y tools)</span><span>Y el <code>COMMENT</code> vuelve: es lo que le dice al agente <b>cuándo</b> usar cada tool</span></div>
+  </div>
+  <span class="kick">Arquitectura e2e</span><span class="pg">35 / 37</span>
 </section>
 
 <!-- 25 · EL CURSO -->
@@ -1046,7 +1094,7 @@
     </div>
     <div class="deliv"><span class="lbl">Proyecto integrador</span><span class="val"><b>Copiloto de Datos</b> — un agente que responde sobre los datos de una empresa, construido de punta a punta. Lo de hoy es una rebanada de ese proyecto.</span></div>
   </div>
-  <span class="kick">El programa</span><span class="pg">35 / 36</span>
+  <span class="kick">El programa</span><span class="pg">36 / 37</span>
 </section>
 
 <!-- 26 · PRÓXIMOS PASOS -->
@@ -1066,7 +1114,7 @@
     </div>
     <div class="foot"><span class="mark"><span></span> Manuel Argüelles · AI Engineer</span><span>Gracias por venir — ahora las preguntas</span></div>
   </div>
-  <span class="kick">Próximos pasos</span><span class="pg">36 / 36</span>
+  <span class="kick">Próximos pasos</span><span class="pg">37 / 37</span>
 </section>
 
 <div id="hud">P · modo presentación &nbsp;·&nbsp; ← → navegar &nbsp;·&nbsp; F pantalla completa</div>
@@ -1134,7 +1182,8 @@
     3:{t:'<b>La pirámide.</b> Señalá la punta violeta y después bajá.<br><span style="opacity:.7">«Todos me piden esto (punta). Nadie me deja hacer esto (los 5 dorados).» Ahí conectás con el 7 % del slide anterior.</span>',u:null},
     31:{t:'<b>Reprint oficial de Gartner</b> (Databricks).<br><span style="opacity:.7">Abrilo para mostrar el gráfico real del cuadrante. 🚨 El MQ donde Databricks está más alto es el de <b>IA/DSML</b> (2.º año); en el de <b>BI</b> es su <b>primera aparición</b>. No los mezcles.</span>',u:GARTNER},
     32:{t:'<b>Camino del dato.</b> Recorrelo de izquierda a derecha y cerrá en la banda negra.<br><span style="opacity:.7">El remate: «hasta acá no hay nada de IA». Si querés, abrí el Catalog Explorer y mostrá Gold de verdad.</span>',u:W+'/explore/data/neptuno_ai/ventas'},
-    33:{t:'<b>Camino de la pregunta.</b> Parate en el nodo violeta (paso 2).<br><span style="opacity:.7">«Acá es donde improvisa si le falta contexto» — es el Demo 0 explicado. Cerrá con el lazo verde: sin eso es una demo con suerte.</span>',u:null}
+    33:{t:'<b>Camino de la pregunta.</b> Parate en el nodo violeta (paso 2).<br><span style="opacity:.7">«Acá es donde improvisa si le falta contexto» — es el Demo 0 explicado. Cerrá con el lazo verde: sin eso es una demo con suerte.</span>',u:null},
+    34:{t:'<b>La otra mitad (RAG).</b> Es el puente al curso.<br><span style="opacity:.7">Remate: «lo de hoy no es el proyecto, es <b>una de sus herramientas</b>». Y el dato que engancha: Vector Search <b>exige CDF</b>, que se prende en la sesión 2 — todo el curso está encadenado.</span>',u:null}
   };
   var slides=[].slice.call(document.querySelectorAll('.slide'));
   Object.keys(CUES).forEach(function(i){
