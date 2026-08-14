@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Webinar v2 · Databricks Genie en producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#533afd; --primary-deep:#4434d4; --primary-soft:#665efd;
+    --ink:#0d253d; --ink-secondary:#273951; --ink-mute:#64748d;
+    --canvas:#ffffff; --canvas-soft:#f6f9fc; --hairline:#e3e8ee;
+    --ruby:#ea2261; --magenta:#f96bee; --success:#27a644;
+    --deliv-bg:#eafaf0; --deliv-bd:#bfe8cd; --deliv-tx:#146c37;
+    --bad-bg:#fff1f4; --bad-bd:#fbc7d4; --bad-tx:#a3123c;
+    --sans:"Inter","SF Pro Display",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#dbe3ec;font-family:var(--sans);color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;gap:24px;padding:32px 0}
+  .slide{width:1280px;height:720px;background:var(--canvas);position:relative;overflow:hidden;
+    box-shadow:0 18px 54px rgba(13,37,61,.22);display:flex;flex-direction:column;flex:none}
+  .mesh{position:absolute;top:0;left:0;right:0;height:46%;pointer-events:none;
+    background:
+      radial-gradient(60% 120% at 12% -10%, rgba(83,58,253,.42), transparent 60%),
+      radial-gradient(50% 120% at 78% -20%, rgba(249,107,238,.38), transparent 55%),
+      radial-gradient(40% 120% at 50% -30%, rgba(234,34,97,.24), transparent 60%);
+    transform:skewY(-6deg);transform-origin:top left}
+  .pad{padding:52px 76px 44px;flex:1;display:flex;flex-direction:column;position:relative;z-index:1}
+  .eyebrow{font-size:13px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--primary);margin-bottom:14px}
+  h1{font-weight:300;font-size:62px;line-height:1.03;letter-spacing:-1.6px;color:var(--ink);max-width:17ch}
+  h1 b{font-weight:600}
+  h2{font-weight:300;font-size:43px;line-height:1.08;letter-spacing:-1px;color:var(--ink);max-width:23ch}
+  h2 b{font-weight:600}
+  .lead{font-size:19px;line-height:1.45;color:var(--ink-secondary);max-width:50ch;margin-top:18px}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;align-self:flex-start;
+    font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:9999px;margin-bottom:14px}
+  .badge.live{background:var(--ruby)}
+  .badge.new{background:var(--success)}
+  .foot{display:flex;justify-content:space-between;align-items:flex-end;
+    border-top:1px solid var(--hairline);padding-top:15px;color:var(--ink-mute);font-size:14px;margin-top:auto}
+  .mark{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--ink)}
+  .mark span{width:15px;height:15px;border-radius:4px;background:var(--primary);transform:skewX(-10deg);display:inline-block}
+  .learn{list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:12px;max-width:56ch}
+  .learn li{font-size:17.5px;line-height:1.4;color:var(--ink-secondary);padding-left:28px;position:relative}
+  .learn li::before{content:"→";position:absolute;left:0;color:var(--primary);font-weight:700}
+  .learn li b{color:var(--ink);font-weight:600}
+  .deliv{margin-top:auto;display:flex;align-items:center;gap:14px;background:var(--deliv-bg);
+    border:1px solid var(--deliv-bd);border-radius:12px;padding:15px 22px}
+  .deliv .lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--deliv-tx);white-space:nowrap}
+  .deliv .val{font-size:15.5px;color:#0f3d22;font-weight:500}
+  .divider .pad{justify-content:center}
+  .phase-num{font-weight:300;font-size:140px;letter-spacing:-6px;line-height:.9;color:var(--primary);opacity:.9}
+  .phase-name{font-weight:600;font-size:48px;letter-spacing:-1px;margin-top:6px;max-width:22ch}
+  .phase-line{font-size:19px;color:var(--ink-secondary);margin-top:18px;max-width:54ch;line-height:1.45}
+  .maprow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+  .mapcard{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:12px;padding:18px 18px}
+  .mapcard .n{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.5px;color:var(--primary);margin-bottom:8px}
+  .mapcard .t{font-weight:600;font-size:17px;letter-spacing:-.3px;line-height:1.15;color:var(--ink);margin-bottom:6px}
+  .mapcard .c{font-size:12.5px;color:var(--ink-mute);line-height:1.35}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:26px;flex:1}
+  .card{border-radius:12px;padding:26px;background:var(--canvas-soft);border:1px solid var(--hairline)}
+  .card.hot{background:linear-gradient(180deg,#f3f1ff,#fff);border-color:#d8d2ff}
+  .card.bad{background:var(--bad-bg);border-color:var(--bad-bd)}
+  .card.good{background:var(--deliv-bg);border-color:var(--deliv-bd)}
+  .card.dark{background:var(--ink);border-color:transparent}
+  .card .k{font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-mute);margin-bottom:12px}
+  .card.hot .k{color:var(--primary)} .card.bad .k{color:var(--bad-tx)} .card.good .k{color:var(--deliv-tx)} .card.dark .k{color:#c9c4ff}
+  .card .big{font-weight:600;font-size:25px;letter-spacing:-.5px;margin-bottom:10px;color:var(--ink)}
+  .card.dark .big{color:#fff}
+  .card p{font-size:15px;line-height:1.45;color:var(--ink-secondary)} .card.dark p{color:#c7d0dc}
+  .card ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .card li{font-size:14.5px;padding-left:22px;position:relative;color:var(--ink-secondary);line-height:1.35}
+  .card li::before{content:"→";position:absolute;left:0;color:var(--ink-mute)}
+  .card.hot li::before{color:var(--primary)} .card.dark li{color:#c7d0dc} .card.dark li::before{color:#c9c4ff}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:24px}
+  .piece{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:12px;padding:24px}
+  .piece .num{font-family:var(--mono);font-size:13px;color:var(--primary);font-weight:500;margin-bottom:10px}
+  .piece .pt{font-weight:600;font-size:20px;letter-spacing:-.4px;margin-bottom:8px;line-height:1.15}
+  .piece p{font-size:14px;line-height:1.4;color:var(--ink-secondary)}
+  .chat{background:var(--ink);border-radius:16px;padding:22px;margin-top:20px;max-width:640px}
+  .bub{border-radius:12px;padding:11px 15px;font-size:15px;line-height:1.4;margin-bottom:9px;max-width:88%}
+  .bub.me{background:var(--primary);color:#fff;margin-left:auto}
+  .bub.ai{background:#1b3a57;color:#eaf1f8}
+  .bub.ai.wrong{background:#3d1526;color:#ffd9e2}
+  .bub.ai.ok{background:#123d29;color:#d6f5e3}
+  .bub small{display:block;font-size:11px;opacity:.7;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+  .code{background:#0b1f33;border-radius:12px;padding:18px 20px;margin-top:18px;font-family:var(--mono);
+    font-size:13px;line-height:1.6;color:#c7d0dc;max-width:720px;white-space:pre;overflow:hidden}
+  .code .c1{color:#8ee6c0}.code .c2{color:#b9b4ff}.code .c3{color:#f9a8d4}.code .dim{color:#5a7189}
+  .steps{display:flex;align-items:center;gap:10px;margin-top:26px;flex-wrap:wrap}
+  .step{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:9999px;padding:10px 18px;font-weight:500;font-size:14.5px}
+  .step.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .arrow{color:var(--ink-mute);font-size:18px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start;flex:1;margin-top:20px}
+  .cta-row{margin-top:auto;display:flex;align-items:center;justify-content:space-between;
+    background:var(--ink);color:#fff;border-radius:14px;padding:22px 32px}
+  .cta-row .txt{font-weight:300;font-size:24px;letter-spacing:-.5px}.cta-row .txt b{font-weight:600}
+  .cta-btn{background:var(--primary);color:#fff;font-weight:600;font-size:15px;padding:13px 26px;border-radius:9999px;white-space:nowrap}
+  .sess{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  .sess .s{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:10px;padding:14px 14px}
+  .sess .s .sn{font-family:var(--mono);font-size:11.5px;color:var(--primary);margin-bottom:6px}
+  .sess .s .st{font-weight:600;font-size:14.5px;line-height:1.2;letter-spacing:-.2px;color:var(--ink)}
+  .sess .s.hl{background:linear-gradient(180deg,#f3f1ff,#fff);border-color:#d8d2ff}
+  .hint{font-size:12.5px;color:var(--ink-mute);margin-top:12px;font-style:italic}
+  .pg{position:absolute;bottom:14px;right:28px;font-size:12px;color:var(--ink-mute);z-index:2}
+  .kick{position:absolute;bottom:14px;left:76px;font-size:12px;color:var(--ink-mute);z-index:2}
+  /* tabla de contraste crudo/curado */
+  .duel{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:24px;
+    border:1px solid var(--hairline);border-radius:14px;overflow:hidden}
+  .duel .h{padding:12px 22px;font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+  .duel .h.l{background:var(--bad-bg);color:var(--bad-tx);border-right:1px solid var(--hairline)}
+  .duel .h.r{background:var(--deliv-bg);color:var(--deliv-tx)}
+  .duel .n{padding:20px 22px 6px;font-weight:600;font-size:42px;letter-spacing:-1.4px;line-height:1}
+  .duel .n.l{color:var(--bad-tx);border-right:1px solid var(--hairline)}
+  .duel .n.r{color:var(--deliv-tx)}
+  .duel .d{padding:0 22px 20px;font-size:14.5px;line-height:1.4;color:var(--ink-secondary)}
+  .duel .d.l{border-right:1px solid var(--hairline)}
+  .spaces{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
+  .sp{border:1px solid var(--hairline);border-radius:12px;padding:18px;background:var(--canvas-soft)}
+  .sp.crudo{background:var(--bad-bg);border-color:var(--bad-bd)}
+  .sp.curado{background:var(--deliv-bg);border-color:var(--deliv-bd)}
+  .sp .st{font-weight:600;font-size:16.5px;letter-spacing:-.3px;line-height:1.15;margin-bottom:6px}
+  .sp .cat{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-bottom:10px}
+  .sp p{font-size:13px;line-height:1.4;color:var(--ink-secondary)}
+  /* modo presentación */
+  body.present{gap:0;padding:0;background:#0b1220;height:100vh;overflow:hidden;justify-content:center}
+  body.present .slide{display:none;box-shadow:none;
+    transform:scale(var(--fit,1));transform-origin:center center}
+  body.present .slide.active{display:flex}
+  #hud{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:99;
+    font-size:12px;color:#7d8ba3;font-family:var(--mono);background:rgba(255,255,255,.06);
+    padding:6px 14px;border-radius:9999px;backdrop-filter:blur(6px)}
+  body:not(.present) #hud{position:fixed;bottom:14px;background:rgba(13,37,61,.85);color:#e3e8ee}
+  /* ─── chivato del presentador ─── */
+  .cue{position:absolute;top:14px;right:22px;z-index:40;width:26px;height:26px;
+    border-radius:50%;display:grid;place-items:center;cursor:pointer;
+    font-size:14px;line-height:1;opacity:.13;transition:opacity .18s, transform .18s;
+    background:transparent;border:0;padding:0;color:var(--primary)}
+  .cue:hover{opacity:1;transform:scale(1.15)}
+  .cue-tip{position:absolute;top:44px;right:22px;z-index:41;width:min(430px,72%);
+    background:#0b0808;color:#f1e7e4;border:1px solid #4a2f2b;border-radius:12px;
+    padding:14px 16px;font-size:13.5px;line-height:1.5;text-align:left;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);opacity:0;pointer-events:none;
+    transform:translateY(-6px);transition:opacity .18s, transform .18s}
+  .cue:hover + .cue-tip{opacity:1;transform:translateY(0)}
+  .cue-tip .lb{display:block;font-size:10px;font-weight:700;letter-spacing:1.1px;
+    text-transform:uppercase;color:var(--primary);margin-bottom:6px}
+  .cue-tip b{color:#fff;font-weight:600}
+  .cue-tip .cta{display:block;margin-top:9px;padding-top:9px;
+    border-top:1px dashed #4a2f2b;font-size:12px;color:#b39c97}
+  .cue-tip code{font-family:var(--mono);font-size:12px;color:#ffab8f}
+</style>
+</head>
+<body>
+
+<!-- 01 · PORTADA -->
+<section class="slide">
+  <div class="mesh"></div>
+  <div class="pad">
+    <span class="eyebrow">Webinar en vivo · 14 ago 2026 · edición 2</span>
+    <h1>Tu Genie no está roto: <b>le falta contexto</b></h1>
+    <p class="lead">Cómo se construye un AI/BI Genie de Databricks que responde bien — capa por capa, en vivo, sobre datos reales. Y qué pasa cuando en vez de uno necesitas tres.</p>
+    <div class="foot">
+      <span class="mark"><span></span> Manuel Argüelles · AI Engineer</span>
+      <span>Databricks on AWS · Unity Catalog · AI/BI Genie</span>
+    </div>
+  </div>
+  <span class="kick">Databricks Genie en producción · v2</span><span class="pg">01 / 26</span>
+</section>
+
+<!-- 02 · QUIÉN SOY -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Antes de empezar</span>
+    <h2>Construyo agentes de datos que están <b>en producción</b>, no en diapositivas</h2>
+    <ul class="learn">
+      <li>AI Engineer. Trabajo en plataformas de datos y agentes que atienden usuarios reales todos los días.</li>
+      <li>Hoy no vengo a venderte que «la IA entiende tus datos». Vengo a mostrarte <b>por qué no los entiende</b> y qué se hace al respecto.</li>
+      <li>Todo lo que veas hoy es <b>en vivo</b>, sobre un workspace real y un dataset que puedes replicar. Los scripts están en un repo público.</li>
+      <li>Esta es la <b>segunda edición</b>. Todo se reconstruyó de cero en otra nube — y las cifras volvieron a dar iguales. Eso también es parte de la lección.</li>
+    </ul>
+    <div class="foot"><span>Manuel Argüelles</span><span>Edición 2 · 14 ago 2026</span></div>
+  </div>
+  <span class="kick">Presentación</span><span class="pg">02 / 26</span>
+</section>
+
+<!-- 03 · LA PROMESA -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">La promesa</span>
+    <h2>Text-to-SQL prometió que <b>cualquiera</b> podría preguntarle a los datos</h2>
+    <div class="cols">
+      <div class="card hot">
+        <div class="k">Lo que se vendió</div>
+        <div class="big">«Conecta tus tablas y pregunta»</div>
+        <p>El área de negocio deja de hacer tickets a Data. El analista deja de escribir el mismo SQL 40 veces. La respuesta llega en segundos.</p>
+      </div>
+      <div class="card">
+        <div class="k">Lo que pasó en la práctica</div>
+        <ul>
+          <li>La primera demo del piloto sale hermosa.</li>
+          <li>La primera pregunta <b>real</b> devuelve una cifra que no cuadra con el reporte oficial.</li>
+          <li>Negocio pierde la confianza en una semana.</li>
+          <li>Conclusión del equipo: <b>«Genie no sirve»</b>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot"><span>La promesa vs. la realidad</span></div>
+  </div>
+  <span class="kick">Situación</span><span class="pg">03 / 26</span>
+</section>
+
+<!-- 04 · DEMO 0 — el fallo -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge live">● En vivo · Demo 0</span>
+    <h2>Le pregunto por el margen de un modelo <b>que no tiene costos</b> — y me da un número</h2>
+    <div class="chat">
+      <div class="bub me"><small>Negocio</small>¿Cuál es el margen de la categoría Bebidas?</div>
+      <div class="bub ai wrong"><small>Genie · sin configurar</small>El margen total de la categoría <b>Bebidas</b> es <b>267.868,18</b>. Este valor representa la suma de los ingresos netos (después de descuentos)…</div>
+      <div class="bub me"><small>Tú, revisando</small>Eso no es el margen: es la venta neta. En este modelo <b>no existe el costo de mercadería</b>. No restó nada — le puso otro nombre a lo que sí sabía calcular.</div>
+    </div>
+    <p class="hint">Dataset: <b>Neptuno</b> — Northwind en español. 830 pedidos · 2.155 líneas · corte 2026-05-06.</p>
+    <div class="foot"><span>No calculó mal: <b>respondió una pregunta que no se podía responder</b></span></div>
+  </div>
+  <span class="kick">Complicación</span><span class="pg">04 / 26</span>
+</section>
+
+<!-- 05 · DIAGNÓSTICO -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Diagnóstico</span>
+    <h2>El Genie no falla por tonto: falla porque <b>el dato no dice qué significa</b></h2>
+    <div class="three">
+      <div class="piece">
+        <div class="num">01</div>
+        <div class="pt">El esquema no es documentación</div>
+        <p><code>PrecioUnidad</code>, <code>Descuento</code>, <code>Cargo</code>. ¿Cuál es el ingreso? El modelo tiene que adivinar, y adivina lo más simple.</p>
+      </div>
+      <div class="piece">
+        <div class="num">02</div>
+        <div class="pt">Lo que no existe, se renombra</div>
+        <p>No hay costos, así que no hay margen posible. Pero nadie se lo dijo: agarró la métrica más parecida que tenía y la llamó margen.</p>
+      </div>
+      <div class="piece">
+        <div class="num">03</div>
+        <div class="pt">El negocio no habla como la base</div>
+        <p>Facturación, ingresos, ventas, revenue. Cuatro palabras, una métrica. Nadie se lo dijo al modelo.</p>
+      </div>
+    </div>
+    <div class="deliv"><span class="lbl">La tesis</span><span class="val">El modelo calcula bien lo que deduce del esquema. Lo que no puede es adivinar tu negocio — y cuando no sabe, <b>no se calla</b>.</span></div>
+  </div>
+  <span class="kick">Diagnóstico</span><span class="pg">05 / 26</span>
+</section>
+
+<!-- 06 · TESIS -->
+<section class="slide divider">
+  <div class="mesh"></div>
+  <div class="pad">
+    <span class="eyebrow">La tesis del taller</span>
+    <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">El contexto no se prompt-ea:<br><b style="font-weight:600">se modela y se gobierna</b></div>
+    <p class="phase-line">Seis capas, de la más barata a la que más mueve la aguja. Ninguna es magia; todas son trabajo de ingeniería de datos que ya sabes hacer.</p>
+  </div>
+  <span class="kick">Tesis</span><span class="pg">06 / 26</span>
+</section>
+
+<!-- 07 · MAPA -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">El método</span>
+    <h2>Las 6 capas, ordenadas de <b>menor esfuerzo a mayor impacto</b></h2>
+    <div class="maprow">
+      <div class="mapcard"><div class="n">CAPA 1</div><div class="t">COMMENT en Unity Catalog</div><div class="c">Qué significa cada tabla y cada columna. La más barata y la que más se salta.</div></div>
+      <div class="mapcard"><div class="n">CAPA 2</div><div class="t">Instrucciones del space</div><div class="c">Las reglas de negocio en texto: qué es «ventas», qué fecha usar, qué no calcular.</div></div>
+      <div class="mapcard"><div class="n">CAPA 3</div><div class="t">SQL curado · trusted queries</div><div class="c">La que más mueve la aguja: el SQL correcto, escrito por quien sabe.</div></div>
+    </div>
+    <div class="maprow">
+      <div class="mapcard"><div class="n">CAPA 4</div><div class="t">Sinónimos y vocabulario</div><div class="c">Facturación = ingresos = revenue = venta neta. Declarado, no adivinado.</div></div>
+      <div class="mapcard"><div class="n">CAPA 5</div><div class="t">UC Functions</div><div class="c">La regla de negocio como función gobernada y versionada, no como copy-paste.</div></div>
+      <div class="mapcard"><div class="n">CAPA 6</div><div class="t">JOINs declarados · PK/FK</div><div class="c">Sin relaciones declaradas, el motor duplica filas en silencio.</div></div>
+    </div>
+    <div class="deliv"><span class="lbl">Orden recomendado</span><span class="val">Empieza por la 1 y la 2 (una tarde). La 3 se construye <b>una corrección a la vez</b>, cada vez que el Genie falla.</span></div>
+  </div>
+  <span class="kick">El método</span><span class="pg">07 / 26</span>
+</section>
+
+<!-- 08 · CAPA 1 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 1 · COMMENT</span>
+    <h2>Si la columna solo se llama <b>Descuento</b>, el modelo decide solo si la aplica</h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>39 % de las líneas de Neptuno tienen descuento. Sin documentar, entra y sale del cálculo <b>según cómo preguntes</b>.</li>
+          <li><code>PrecioUnidad</code> existe en <b>dos</b> tablas: el histórico del pedido y el catálogo actual. Se llaman igual y no significan lo mismo.</li>
+          <li><code>Cargo</code> parece ingreso y es <b>flete</b> — un costo.</li>
+          <li>No documentes 74 columnas: documenta <b>las 12 que se prestan a confusión</b>.</li>
+        </ul>
+      </div>
+      <div class="code"><span class="c2">COMMENT ON COLUMN</span> detalles_pedidos.Descuento <span class="c2">IS</span>
+  <span class="c1">'Descuento fraccional 0-1 aplicado a esta línea.
+   La venta neta SIEMPRE lo resta:
+   PrecioUnidad * Cantidad * (1 - Descuento)'</span>;
+
+<span class="dim">-- 12 columnas trampa, no las 74</span></div>
+    </div>
+    <div class="foot"><span>Unity Catalog · <code>COMMENT ON COLUMN</code></span><span>Cuesta una tarde</span></div>
+  </div>
+  <span class="kick">Capa 1</span><span class="pg">08 / 26</span>
+</section>
+
+<!-- 09 · CAPA 2 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 2 · Instrucciones</span>
+    <h2>Las instrucciones del space le dicen a Genie <b>cómo trabaja tu empresa</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>La regla de negocio que no está en ninguna columna: <b>«ventas» significa venta neta, siempre</b>.</li>
+          <li>El default explícito: <b>«el año» es por <code>FechaPedido</code></b>, no por fecha de envío.</li>
+          <li>Y lo más importante: <b>qué NO calcular</b>. «No existe costo de mercadería: si te piden margen, dilo.»</li>
+          <li>Van en el space, no en las tablas: <b>son locales</b>. Dos spaces sobre las mismas tablas pueden tener reglas distintas.</li>
+        </ul>
+      </div>
+      <div class="card dark">
+        <div class="k">Del archivo de instrucciones</div>
+        <p>«No existe costo de mercadería ni utilidad en este modelo. Si preguntan por margen, rentabilidad o ganancia, <b>explica que no se puede calcular</b> y ofrece la venta neta.»</p>
+        <ul><li>Esa frase es la que produce el «no puedo» del A/B.</li></ul>
+      </div>
+    </div>
+    <div class="foot"><span>Genie space → Configure → Instructions</span></div>
+  </div>
+  <span class="kick">Capa 2</span><span class="pg">09 / 26</span>
+</section>
+
+<!-- 10 · CAPA 3 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 3 · Trusted queries</span>
+    <h2>Esta es la capa que <b>más mueve la aguja</b>, y la que casi nadie carga</h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>Una <b>trusted query</b> es el SQL correcto para una pregunta frecuente, escrito por quien sabe el negocio.</li>
+          <li>El Genie no lo re-inventa: lo <b>reusa y lo adapta</b>. Deja de improvisar en las preguntas que más importan.</li>
+          <li>Se construye <b>una corrección a la vez</b>: cada respuesta mala que arreglas se vuelve una query de confianza.</li>
+          <li>El space del Radar de hoy lleva <b>7</b>. Es el que mejor responde de los cuatro.</li>
+        </ul>
+      </div>
+      <div class="code"><span class="dim">-- Venta neta por categoría y año</span>
+<span class="c2">SELECT</span> c.NombreCategoria,
+       <span class="c3">SUM</span>(venta_neta(d.PrecioUnidad,
+                       d.Cantidad,
+                       d.Descuento)) <span class="c2">AS</span> neto
+<span class="c2">FROM</span> detalles_pedidos d
+<span class="c2">JOIN</span> pedidos p <span class="c2">ON</span> p.IdPedido = d.IdPedido
+<span class="dim">-- el año se cuenta por FechaPedido</span>
+<span class="c2">WHERE</span> <span class="c3">YEAR</span>(p.FechaPedido) = 2025</div>
+    </div>
+    <div class="foot"><span>Genie space → SQL queries</span><span>La capa 3 se construye con el tiempo</span></div>
+  </div>
+  <span class="kick">Capa 3</span><span class="pg">10 / 26</span>
+</section>
+
+<!-- 11 · CAPA 4 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 4 · Vocabulario</span>
+    <h2>«Facturación», «ventas» e «ingresos» son la misma métrica — <b>para ti</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>El negocio pregunta con <b>sus</b> palabras, no con los nombres de tus tablas.</li>
+          <li>Los sinónimos se declaran: facturación / ingresos / revenue / venta → <b>venta neta</b>.</li>
+          <li>También los valores: si alguien dice «Beverages» y tu categoría se llama «Bebidas», hay que unirlos.</li>
+          <li>En el space se declara <b>por columna</b> (entity matching), no solo en un texto libre.</li>
+        </ul>
+      </div>
+      <div class="card hot">
+        <div class="k">Por qué importa más de lo que parece</div>
+        <div class="big">La pregunta nunca viene limpia</div>
+        <p>«¿Cómo venimos de facturación este mes?» tiene tres ambigüedades: qué es facturación, qué es «venimos» y qué es «este mes». Las tres se resuelven en capas, no en el prompt del usuario.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Genie space → Sources → Columns → Entity matching</span></div>
+  </div>
+  <span class="kick">Capa 4</span><span class="pg">11 / 26</span>
+</section>
+
+<!-- 12 · CAPA 5 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 5 · UC Functions</span>
+    <h2>Las UC Functions convierten tu regla de negocio en algo que el Genie <b>no puede escribir mal</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li><code>venta_neta(precio, cantidad, descuento)</code> — una sola definición, gobernada y versionada en Unity Catalog.</li>
+          <li>El Genie la <b>invoca</b> en vez de reescribir la fórmula. No hay forma de que olvide el descuento.</li>
+          <li>Se audita y se le dan permisos como a cualquier objeto de UC.</li>
+          <li>Bonus: la misma función se reusa después como <b>tool de un agente</b>. La capa semántica no se tira.</li>
+        </ul>
+      </div>
+      <div class="code"><span class="c2">CREATE OR REPLACE FUNCTION</span> venta_neta(
+  precio <span class="c1">DECIMAL</span>(10,2),
+  cantidad <span class="c1">INT</span>,
+  descuento <span class="c1">FLOAT</span>)
+<span class="c2">RETURNS</span> <span class="c1">DECIMAL</span>(12,2)
+<span class="c2">COMMENT</span> <span class="c1">'Venta neta de una línea'</span>
+<span class="c2">RETURN</span> <span class="c3">ROUND</span>(precio*cantidad*(1-descuento),2);</div>
+    </div>
+    <div class="foot"><span>Catalog Explorer → Functions</span><span>Verificado: devuelve 103.924,32</span></div>
+  </div>
+  <span class="kick">Capa 5</span><span class="pg">12 / 26</span>
+</section>
+
+<!-- 13 · CAPA 6 -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge">Capa 6 · Relaciones</span>
+    <h2>Declarar los JOINs mata la respuesta <b>que suma de más sin avisar</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>Sin PK/FK declaradas, un JOIN mal armado <b>duplica filas</b> — y el total sale inflado sin ningún error.</li>
+          <li>Es el peor tipo de bug: no rompe, no avisa, solo miente un poco.</li>
+          <li>Se declaran en <b>Unity Catalog</b>, no en Genie. Con eso el motor arma solo sus relaciones.</li>
+          <li>En Neptuno son <b>15 constraints</b>. Media hora de trabajo.</li>
+        </ul>
+      </div>
+      <div class="code"><span class="c2">ALTER TABLE</span> detalles_pedidos
+  <span class="c2">ADD CONSTRAINT</span> fk_dp_pedido
+  <span class="c2">FOREIGN KEY</span> (IdPedido)
+  <span class="c2">REFERENCES</span> pedidos(IdPedido);
+
+<span class="dim">-- 15 constraints en total</span>
+<span class="dim">-- el motor deriva sus join_specs solo</span></div>
+    </div>
+    <div class="foot"><span>Unity Catalog · PK / FK informativas</span></div>
+  </div>
+  <span class="kick">Capa 6</span><span class="pg">13 / 26</span>
+</section>
+
+<!-- 14 · ANTES / DESPUÉS -->
+<section class="slide">
+  <div class="mesh" style="height:34%"></div>
+  <div class="pad">
+    <span class="badge live">● En vivo · La misma pregunta, los dos spaces abiertos</span>
+    <h2>Misma pregunta, ahora con la <b>respuesta honesta</b> y el SQL a la vista</h2>
+    <div class="duel">
+      <div class="h l">Genie crudo · catálogo <code>neptuno</code></div>
+      <div class="h r">Genie curado · catálogo <code>neptuno_ai</code></div>
+      <div class="n l">267.868,18</div>
+      <div class="n r">«No se puede»</div>
+      <div class="d l">Lo llama «margen» con total seguridad. Es la venta neta con otro nombre: no restó ningún costo, porque no hay ninguno que restar.</div>
+      <div class="d r">«No existe costo de mercadería ni utilidad; solo precios de venta históricos y precios de lista. ¿Quieres las ventas de Bebidas?» — y ofrece <b>103.924,32</b> con su SQL.</div>
+    </div>
+    <div class="deliv"><span class="lbl">Lo importante</span><span class="val">La mejor respuesta de un sistema de datos a veces es <b>«esa pregunta no se puede responder con estos datos»</b>.</span></div>
+  </div>
+  <span class="kick">Resultado</span><span class="pg">14 / 26</span>
+</section>
+
+<!-- 15 · PUENTE · UN GENIE NO ALCANZA -->
+<section class="slide divider">
+  <div class="pad">
+    <span class="eyebrow">Y acá empieza la parte nueva</span>
+    <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Un Genie curado no alcanza:<br><b style="font-weight:600">se gobierna un portafolio</b></div>
+    <p class="phase-line">Las 6 capas resuelven <b>un</b> dominio. En cuanto entra el segundo — inventario, comercial, finanzas — descubres que un space que sirve para todo no sirve para nada. Cada dominio tiene sus trampas, y son distintas.</p>
+  </div>
+  <span class="kick">Puente</span><span class="pg">15 / 26</span>
+</section>
+
+<!-- 16 · LOS 4 SPACES -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge new">● Nuevo en esta edición</span>
+    <h2>Hoy no hay un Genie: hay <b>cuatro</b>, y cada uno sabe una cosa</h2>
+    <div class="spaces">
+      <div class="sp crudo">
+        <div class="st">Ventas Neptuno</div>
+        <div class="cat">neptuno · CRUDO</div>
+        <p>Deliberadamente sin curar. Es el Demo 0: existe para que lo veas fallar.</p>
+      </div>
+      <div class="sp curado">
+        <div class="st">Ventas Neptuno AI</div>
+        <div class="cat">neptuno_ai · CURADO</div>
+        <p>La otra mitad del A/B. Mismas tablas, catálogo clonado, las 6 capas puestas.</p>
+      </div>
+      <div class="sp curado">
+        <div class="st">Inventario Neptuno</div>
+        <div class="cat">neptuno_ai · CURADO</div>
+        <p>Reposición de stock. Su trampa no tiene nada que ver con la de ventas.</p>
+      </div>
+      <div class="sp curado">
+        <div class="st">Radar Comercial</div>
+        <div class="cat">neptuno_ai · CURADO</div>
+        <p>Clientes que se caen, cartera, vendedores. La trampa es <b>temporal</b>.</p>
+      </div>
+    </div>
+    <div class="deliv"><span class="lbl">La regla que aprendimos armándolos</span><span class="val">Los <code>COMMENT</code> son <b>globales al metastore</b>; las instrucciones son <b>locales al space</b>. Por eso el crudo vive en otro catálogo: si documentas <code>neptuno</code>, curas el Demo 0 sin querer.</span></div>
+  </div>
+  <span class="kick">Portafolio</span><span class="pg">16 / 26</span>
+</section>
+
+<!-- 17 · CASO INVENTARIO -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge live">● En vivo · Caso 2 · Inventario</span>
+    <h2>«¿Qué tengo que reponer?» — el crudo dice <b>17 productos</b>. Son <b>2</b>.</h2>
+    <div class="duel">
+      <div class="h l">Sin curar</div>
+      <div class="h r">Curado</div>
+      <div class="n l">17 a reponer</div>
+      <div class="n r">2 a reponer</div>
+      <div class="d l">Compara <code>UnidadesEnExistencia</code> contra el punto de pedido y se olvida de <code>UnidadesEnPedido</code>: <b>lo que ya viene en camino</b>. 15 falsos positivos.</div>
+      <div class="d r">Cuenta el stock disponible <b>más</b> lo que está por llegar. Y descarta los productos <code>Suspendido</code>: no tiene sentido reponer lo descontinuado.</div>
+    </div>
+    <div class="deliv"><span class="lbl">Lo que cuesta el error</span><span class="val">Comprar <b>8 veces</b> lo que hacía falta. Y no es un error de SQL: es una columna que nadie le explicó al modelo.</span></div>
+  </div>
+  <span class="kick">Caso · Inventario</span><span class="pg">17 / 26</span>
+</section>
+
+<!-- 18 · CASO RADAR -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge live">● En vivo · Caso 3 · Radar comercial</span>
+    <h2>«¿Qué clientes se están cayendo?» — 48 alertas cuando hay <b>23 problemas</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>Los datos cortan el <b>2026-05-06</b>: 2026 tiene 5 meses y 2025 tiene 12.</li>
+          <li>Comparar año contra año hace que <b>48 de 79 clientes «caigan»</b>. Comparando el mismo rango de meses: <b>23</b>.</li>
+          <li>~25 falsas alarmas: <b>más de la mitad del radar sería ruido</b>.</li>
+          <li>No es un error de cálculo. Es un error de <b>comparación</b> — y el SQL sale perfecto igual.</li>
+        </ul>
+      </div>
+      <div class="card dark">
+        <div class="k">Por qué esto mata el proyecto</div>
+        <div class="big">Un radar ruidoso se apaga solo</div>
+        <p>El equipo comercial mira 48 alertas, verifica cinco, encuentra que tres no eran nada. A la segunda semana deja de abrirlo. El sistema no falló: <b>perdió la confianza</b>, que es peor.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Curado: ventana móvil contra el máximo <code>FechaPedido</code>, nunca contra <code>CURRENT_DATE</code></span></div>
+  </div>
+  <span class="kick">Caso · Radar</span><span class="pg">18 / 26</span>
+</section>
+
+<!-- 19 · LA PREGUNTA CON SESGO -->
+<section class="slide">
+  <div class="pad">
+    <span class="badge live">● En vivo · el momento que no estaba en el guion</span>
+    <h2>Le pregunto qué categorías <b>están cayendo</b>. Y me dice que ninguna.</h2>
+    <div class="chat">
+      <div class="bub me"><small>Negocio</small>¿Qué categorías están cayendo este año?</div>
+      <div class="bub ai ok"><small>Genie · curado</small><b>Ninguna categoría muestra una caída</b> en 2026 (enero-mayo) frente al mismo periodo de 2025; todas presentan crecimiento. Condimentos crece 36,4 % y Pescados y Mariscos 158,5 %.</div>
+    </div>
+    <ul class="learn" style="margin-top:16px">
+      <li>La pregunta <b>presupone</b> la respuesta. Un sistema complaciente te devuelve «las que menos crecen» y las llama caídas.</li>
+      <li>Comparando 2026-completo contra 2025-completo, <b>todas</b> caerían. La comparación justa <b>invierte el veredicto entero</b>.</li>
+    </ul>
+    <div class="foot"><span>El sesgo no siempre está en el dato: a veces lo trae la pregunta</span></div>
+  </div>
+  <span class="kick">Caso · Radar</span><span class="pg">19 / 26</span>
+</section>
+
+<!-- 20 · EVALUACIÓN -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Y esto es lo que casi nadie hace</span>
+    <h2>Si no lo mides, no sabes si mejoró: <b>evaluación con preguntas de referencia</b></h2>
+    <div class="three">
+      <div class="piece">
+        <div class="num">01</div>
+        <div class="pt">Arma tu set de oro</div>
+        <p>20–30 preguntas reales del negocio, cada una con su respuesta correcta validada por quien sabe.</p>
+      </div>
+      <div class="piece">
+        <div class="num">02</div>
+        <div class="pt">Corre el set en cada cambio</div>
+        <p>Agregar una trusted query puede arreglar tres preguntas y romper una. Sin el set, no te enteras.</p>
+      </div>
+      <div class="piece">
+        <div class="num">03</div>
+        <div class="pt">Mide lo que importa</div>
+        <p>No «suena bien»: ¿la cifra coincide? ¿el SQL usa las tablas correctas? Exactitud, no simpatía.</p>
+      </div>
+    </div>
+    <div class="deliv"><span class="lbl">Lo que hay detrás de este webinar</span><span class="val">Las <b>21 preguntas</b> que verás hoy están ejecutadas y transcritas en un archivo del repo. Sé de antemano qué contesta cada space — <b>eso</b> es tener un set de oro.</span></div>
+  </div>
+  <span class="kick">Confianza</span><span class="pg">20 / 26</span>
+</section>
+
+<!-- 21 · GOBIERNO -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">Gobierno</span>
+    <h2>Un Genie en producción responde <b>solo lo que ese usuario tiene permiso de ver</b></h2>
+    <div class="split">
+      <div>
+        <ul class="learn">
+          <li>Genie hereda los permisos de <b>Unity Catalog</b>: no hay una puerta trasera que salte el modelo de seguridad.</li>
+          <li><b>Row filters</b> y <b>column masks</b>: el vendedor de la zona norte pregunta «mis ventas» y ve las suyas.</li>
+          <li>PII enmascarada antes de que el LLM la vea, no después.</li>
+          <li>Auditoría: quién preguntó qué, y qué SQL corrió. Requisito, no lujo.</li>
+        </ul>
+      </div>
+      <div class="card dark">
+        <div class="k">El riesgo real</div>
+        <div class="big">Abrir el chat a toda la empresa</div>
+        <p>Un Genie mal gobernado es la forma más rápida de que alguien pregunte «¿cuánto gana cada empleado?» y obtenga una respuesta correcta.</p>
+        <ul><li>La seguridad se diseña <b>antes</b> del rollout.</li></ul>
+      </div>
+    </div>
+    <div class="foot"><span>Unity Catalog · row filters · column masks · audit logs</span></div>
+  </div>
+  <span class="kick">Gobierno</span><span class="pg">21 / 26</span>
+</section>
+
+<!-- 22 · CLÍMAX · CONSUMO -->
+<section class="slide">
+  <div class="mesh"></div>
+  <div class="pad">
+    <span class="badge live">● En vivo · Clímax</span>
+    <h2>De la <b>Conversation API</b> a una app donde cualquiera pregunta</h2>
+    <div class="steps">
+      <span class="step on">Pregunta en lenguaje natural</span><span class="arrow">→</span>
+      <span class="step on">Conversation API</span><span class="arrow">→</span>
+      <span class="step on">SQL generado + resultado</span><span class="arrow">→</span>
+      <span class="step on">Databricks App</span>
+    </div>
+    <ul class="learn">
+      <li>El Genie deja de vivir dentro de Databricks: se vuelve un <b>endpoint</b> que cualquier aplicación consume.</li>
+      <li>La API devuelve la respuesta <b>y el SQL</b> — por eso se puede auditar y por eso el negocio confía.</li>
+      <li>Los <b>cuatro spaces de hoy se crearon por API</b>, sin un solo clic. Lo que se crea por API se versiona, se revisa y se reconstruye.</li>
+    </ul>
+    <div class="deliv"><span class="lbl">Lo que acabas de ver</span><span class="val">Un portafolio de asistentes de datos gobernado, evaluado y disponible para gente que no escribe SQL.</span></div>
+  </div>
+  <span class="kick">Consumo</span><span class="pg">22 / 26</span>
+</section>
+
+<!-- 23 · PUENTE 2 -->
+<section class="slide divider">
+  <div class="pad">
+    <span class="eyebrow">Ahora la parte incómoda</span>
+    <div class="phase-name" style="font-weight:300;font-size:46px;letter-spacing:-1.2px">Lo que acabas de ver es<br><b style="font-weight:600">una rebanada</b> de algo más grande</div>
+    <p class="phase-line">Para que esos Genies existieran, alguien tuvo que dejar los datos limpios, modelarlos, gobernarlos y desplegar la app. El chat es el 10 % visible. Debajo hay un stack completo.</p>
+  </div>
+  <span class="kick">Puente</span><span class="pg">23 / 26</span>
+</section>
+
+<!-- 24 · EL STACK + EL CURSO -->
+<section class="slide">
+  <div class="pad">
+    <span class="eyebrow">El stack debajo del chat</span>
+    <h2>El Genie es la punta: debajo hay un stack que <b>hay que saber construir</b></h2>
+    <div class="steps" style="margin-top:26px">
+      <span class="step">Ingesta</span><span class="arrow">→</span>
+      <span class="step">Lakehouse gobernado</span><span class="arrow">→</span>
+      <span class="step">bronze→silver→gold</span><span class="arrow">→</span>
+      <span class="step">RAG</span><span class="arrow">→</span>
+      <span class="step">Agente con tools</span>
+    </div>
+    <div class="steps" style="margin-top:14px">
+      <span class="step">Evaluación</span><span class="arrow">→</span>
+      <span class="step">Guardrails y gobierno</span><span class="arrow">→</span>
+      <span class="step">Model Serving</span><span class="arrow">→</span>
+      <span class="step on">App + monitoreo</span>
+    </div>
+    <p class="lead">Hoy tocamos tres piezas de esa cadena: <b>modelado semántico</b>, <b>evaluación</b> y <b>gobierno</b>. Son exactamente las que separan un piloto bonito de algo que aguanta en producción.</p>
+    <div class="foot"><span>Del dato crudo al agente en producción</span></div>
+  </div>
+  <span class="kick">El stack</span><span class="pg">24 / 26</span>
+</section>
+
+<!-- 25 · EL CURSO -->
+<section class="slide">
+  <div class="mesh" style="height:32%"></div>
+  <div class="pad">
+    <span class="eyebrow">Programa de especialización · arranca el lunes 17 de agosto</span>
+    <h2><b>Databricks AI Engineer</b> — 8 sesiones, de Data Engineer a AI Engineer</h2>
+    <div class="sess">
+      <div class="s"><div class="sn">SESIÓN 1</div><div class="st">La plataforma de datos desde cero</div></div>
+      <div class="s"><div class="sn">SESIÓN 2</div><div class="st">Pipelines que alimentan la IA</div></div>
+      <div class="s"><div class="sn">SESIÓN 3</div><div class="st">Fundamentos de IA Generativa</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 4</div><div class="st">RAG — el contexto de tu negocio</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 5</div><div class="st">Agentes: del que responde al que actúa</div></div>
+      <div class="s hl"><div class="sn">SESIÓN 6</div><div class="st">Evaluación: cómo saber si es buena</div></div>
+      <div class="s"><div class="sn">SESIÓN 7</div><div class="st">Gobierno y guardrails</div></div>
+      <div class="s"><div class="sn">SESIÓN 8</div><div class="st">Despliegue y monitoreo</div></div>
+    </div>
+    <div class="deliv"><span class="lbl">Proyecto integrador</span><span class="val"><b>Copiloto de Datos</b> — un agente que responde sobre los datos de una empresa, construido de punta a punta. Lo de hoy es una rebanada de ese proyecto.</span></div>
+  </div>
+  <span class="kick">El programa</span><span class="pg">25 / 26</span>
+</section>
+
+<!-- 26 · PRÓXIMOS PASOS -->
+<section class="slide">
+  <div class="mesh"></div>
+  <div class="pad">
+    <span class="eyebrow">Para cerrar</span>
+    <h2>Tres cosas que puedes hacer <b>esta semana</b></h2>
+    <ul class="learn">
+      <li><b>Escribe 10 COMMENT</b> en las columnas de tu tabla más consultada. Es la capa más barata y la que más se salta.</li>
+      <li><b>Arma tu set de 20 preguntas</b> con respuesta validada. Sin eso no sabes si tu Genie mejora o empeora.</li>
+      <li><b>Antes de armar el segundo space, pregúntate cuál es SU trampa.</b> No es la misma que la del primero.</li>
+    </ul>
+    <div class="cta-row">
+      <div class="txt">Programa <b>Databricks AI Engineer</b> · empieza el <b>lun 17 ago</b><br><span style="font-size:15px;opacity:.75">8 sesiones en vivo · lun y mié 19:00–22:00 · proyecto «Copiloto de Datos»</span></div>
+      <span class="cta-btn">Inscripciones · [ENLACE]</span>
+    </div>
+    <div class="foot"><span class="mark"><span></span> Manuel Argüelles · AI Engineer</span><span>Gracias por venir — ahora las preguntas</span></div>
+  </div>
+  <span class="kick">Próximos pasos</span><span class="pg">26 / 26</span>
+</section>
+
+<div id="hud">P · modo presentación &nbsp;·&nbsp; ← → navegar &nbsp;·&nbsp; F pantalla completa</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function fit(){
+    if(!document.body.classList.contains('present'))return;
+    var s=Math.min(window.innerWidth/1280, window.innerHeight/720);
+    document.body.style.setProperty('--fit', s);
+  }
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('active',k===i)});
+    document.getElementById('hud').textContent=(i+1)+' / '+slides.length+'  ·  ← →  ·  P salir  ·  F pantalla completa';
+  }
+  function present(on){
+    document.body.classList.toggle('present',on);
+    if(on){fit();show(i)}
+    else{slides.forEach(function(s){s.classList.remove('active')});
+      document.getElementById('hud').textContent='P · modo presentación  ·  ← → navegar  ·  F pantalla completa';
+      slides[i].scrollIntoView({block:'center'})}
+  }
+  addEventListener('resize',fit);
+  addEventListener('keydown',function(e){
+    var k=e.key.toLowerCase();
+    if(k==='p'){present(!document.body.classList.contains('present'))}
+    else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+    else if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){
+      if(!document.body.classList.contains('present'))present(true); else show(i+1); e.preventDefault()}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){
+      if(!document.body.classList.contains('present'))present(true); else show(i-1); e.preventDefault()}
+  });
+})();
+</script>
+<script>
+(function(){
+  // ─── Plataforma: Databricks on AWS (14-ago-2026) ───
+  var W='https://dbc-fba20ab2-d1fc.cloud.databricks.com';
+  var CRUDO      = W+'/genie/rooms/01f1979ee629133bb42428d55e433cff';
+  var CURADO     = W+'/genie/rooms/01f197a3c2c51e0493319fcefc5fb835';
+  var INVENTARIO = W+'/genie/rooms/01f197a1f44d173a824fb4810124d4c6';
+  var RADAR      = W+'/genie/rooms/01f197a566ab13499bbdfd31a9bb6e9e';
+  var GUIA='../guia/taller-v2.html';
+  // índice 0-based del slide -> qué abrir
+  var CUES={
+    3:{t:'<b>Genie CRUDO</b> — preguntá:<br>«¿Cuál es el margen de la categoría Bebidas?»<br><span style="opacity:.7">Debe responder <b>267.868,18</b> llamándolo margen. Si querés más impacto, pedí «rentabilidad por categoría».</span>',u:CRUDO},
+    6:{t:'<b>taller-v2.html</b> → pestaña <b>Las 6 capas</b><br><span style="opacity:.7">Cada capa trae su SQL copiable y sus enlaces.</span>',u:GUIA},
+    7:{t:'<b>Catalog Explorer</b>, las dos tablas lado a lado:<br><code>neptuno/ventas/detalles_pedidos</code> (sin comentarios)<br><code>neptuno_ai/…</code> (con comentarios)<br><span style="opacity:.7">Solo 12 de 74 columnas documentadas: las que fallan.</span>',u:W+'/explore/data/neptuno_ai/ventas/detalles_pedidos'},
+    8:{t:'<b>Genie CURADO</b> → Configure → <b>Instructions</b><br><span style="opacity:.7">Ahí está el bloque de negocio, fechas y el «no calcules margen».</span>',u:CURADO+'?sp=context.instructions'},
+    9:{t:'Mismo panel → sección de <b>SQL queries</b><br><span style="opacity:.7">Las trusted queries. El space del Radar tiene 7 — es el mejor ejemplo.</span>',u:RADAR+'?sp=context.instructions'},
+    10:{t:'Configure → <b>Sources</b> → <b>productos</b> → Columns<br><span style="opacity:.7">Mirá las pastillas <b>Entity matching</b>: el vocabulario también se declara acá, no solo en texto.</span>',u:CURADO+'?sp=context.data.neptuno_ai.ventas.productos'},
+    11:{t:'<b>Catalog Explorer</b> → la función <b>venta_neta</b><br><span style="opacity:.7">Gobernada, versionada, y reusable después como tool del agente.</span>',u:W+'/explore/data/functions/neptuno_ai/ventas/venta_neta'},
+    12:{t:'<b>neptuno_ai/ventas/productos</b> → badges <b>PK / FK</b><br><span style="opacity:.7">Se declaran en Unity Catalog, no en Genie. 15 constraints.</span>',u:W+'/explore/data/neptuno_ai/ventas/productos'},
+    13:{t:'<b>A/B lado a lado — SIN rollback.</b><br>Abrí los DOS spaces en pestañas y hacé la misma pregunta.<br><span style="opacity:.7">Crudo: 267.868,18 · Curado: «no se puede calcular el margen».</span>',u:CURADO},
+    16:{t:'<b>Genie INVENTARIO</b> — preguntá:<br>«¿Qué productos tengo que reponer?»<br><span style="opacity:.7">Curado responde <b>2</b>. El crudo daría 17: se olvida de <code>UnidadesEnPedido</code>.</span>',u:INVENTARIO},
+    17:{t:'<b>Genie RADAR</b> — preguntá:<br>«¿Qué clientes se están cayendo?»<br><span style="opacity:.7">Debe responder <b>23</b> y <b>decir</b> que comparó ene-may vs ene-may. Año vs año daría 48.</span>',u:RADAR},
+    18:{t:'<b>Genie RADAR</b> — la pregunta con sesgo:<br>«¿Qué categorías están cayendo este año?»<br><span style="opacity:.7">Responde que <b>ninguna</b>. Es el mejor momento del bloque: no le sigue la corriente a la pregunta.</span>',u:RADAR},
+    21:{t:'<b>Terminal</b>:<br><code>cd webinar-genie-databricks-v2/scripts</code><br><code>python3 ab.py "tu pregunta"</code><br><span style="opacity:.7">Pregunta a los dos spaces a la vez y muestra el SQL. Es la Conversation API en vivo.</span>',u:null}
+  };
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  Object.keys(CUES).forEach(function(i){
+    var s=slides[+i]; if(!s) return;
+    var c=CUES[i];
+    var b=document.createElement('button');
+    b.className='cue'; b.textContent='★'; b.title='Recurso para este slide';
+    var tip=document.createElement('div');
+    tip.className='cue-tip';
+    tip.innerHTML='<span class="lb">Chivato del presentador</span>'+c.t+
+      (c.u?'<span class="cta">Clic en la ★ para abrirlo</span>':'<span class="cta">Sin enlace — es en terminal</span>');
+    if(c.u){ b.onclick=function(){window.open(c.u,'_blank')}; }
+    s.appendChild(b); s.appendChild(tip);
+  });
+})();
+</script>
+</body>
+</html>

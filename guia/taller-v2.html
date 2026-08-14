@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consola del taller · Databricks Genie en producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#533afd; --primary-deep:#4434d4;
+    --ink:#0d253d; --ink-2:#273951; --ink-mute:#64748d;
+    --canvas:#fff; --soft:#f6f9fc; --line:#e3e8ee;
+    --ruby:#ea2261; --magenta:#f96bee;
+    --ok-bg:#eafaf0; --ok-bd:#bfe8cd; --ok-tx:#146c37;
+    --bad-bg:#fff1f4; --bad-bd:#fbc7d4; --bad-tx:#a3123c;
+    --warn-bg:#fff8ec; --warn-bd:#fadfb0; --warn-tx:#8a5a10;
+    --sans:"Inter",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--soft);line-height:1.5}
+  .mesh{position:absolute;inset:0 0 auto 0;height:340px;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60% 120% at 12% -10%, rgba(83,58,253,.30), transparent 60%),
+      radial-gradient(50% 120% at 78% -20%, rgba(249,107,238,.26), transparent 55%),
+      radial-gradient(40% 120% at 50% -30%, rgba(234,34,97,.16), transparent 60%);
+    transform:skewY(-4deg);transform-origin:top left}
+  header{position:relative;background:var(--canvas);overflow:hidden;border-bottom:1px solid var(--line)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  .hd{position:relative;z-index:1;padding:44px 0 30px}
+  .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--primary);margin-bottom:12px}
+  h1{font-weight:300;font-size:clamp(30px,4.4vw,50px);line-height:1.05;letter-spacing:-1.4px}
+  h1 b{font-weight:600}
+  .sub{font-size:17px;color:var(--ink-2);margin-top:14px;max-width:62ch}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+  .chip{background:var(--soft);border:1px solid var(--line);border-radius:9999px;
+    padding:7px 15px;font-size:13px;color:var(--ink-2)}
+  .chip b{color:var(--ink);font-weight:600}
+  nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:4px;overflow-x:auto}
+  .tab{appearance:none;background:none;border:0;font:inherit;cursor:pointer;
+    padding:15px 16px;font-size:14.5px;font-weight:500;color:var(--ink-mute);
+    border-bottom:2px solid transparent;white-space:nowrap}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  main{padding:34px 0 90px}
+  .panel[hidden]{display:none}
+  h2.sec{font-weight:300;font-size:30px;letter-spacing:-.7px;margin-bottom:8px}
+  h2.sec b{font-weight:600}
+  .lead{color:var(--ink-2);font-size:16px;max-width:70ch;margin-bottom:26px}
+  .card{background:var(--canvas);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  /* ── tablas del modelo ── */
+  .tbl{padding:18px 20px}
+  .tbl h3{font-size:16.5px;font-weight:600;letter-spacing:-.2px;display:flex;align-items:center;gap:9px}
+  .tbl h3 .kind{font-family:var(--mono);font-size:10.5px;font-weight:500;text-transform:uppercase;
+    letter-spacing:.6px;padding:3px 8px;border-radius:5px;background:var(--soft);color:var(--ink-mute);border:1px solid var(--line)}
+  .tbl h3 .kind.hecho{background:#efeaff;color:var(--primary-deep);border-color:#d8d2ff}
+  .tbl .rows{font-size:12.5px;color:var(--ink-mute);margin:5px 0 12px;font-family:var(--mono)}
+  .cols{display:flex;flex-wrap:wrap;gap:6px}
+  .col{font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:6px;
+    background:var(--soft);border:1px solid var(--line);color:var(--ink-2)}
+  .col.trap{background:var(--bad-bg);border-color:var(--bad-bd);color:var(--bad-tx);
+    font-weight:500;cursor:help;position:relative}
+  .col.key{background:#eef6ff;border-color:#c9e0fb;color:#14508f}
+  /* ── capas ── */
+  .layer{background:var(--canvas);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+  .layer > summary{cursor:pointer;list-style:none;padding:18px 22px;display:flex;
+    align-items:flex-start;gap:16px}
+  .layer > summary::-webkit-details-marker{display:none}
+  .layer[open] > summary{border-bottom:1px solid var(--line);background:var(--soft)}
+  .num{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+    background:var(--primary);color:#fff;font-weight:600;font-size:14px}
+  .layer .t{flex:1}
+  .layer .t .h{font-weight:600;font-size:17px;letter-spacing:-.2px}
+  .layer .t .d{font-size:14px;color:var(--ink-mute);margin-top:3px}
+  .layer .where{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+    padding:4px 10px;border-radius:9999px;flex:none;margin-top:3px}
+  .where.sql{background:#eef6ff;color:#14508f}
+  .where.ui{background:var(--warn-bg);color:var(--warn-tx)}
+  .body{padding:20px 22px}
+  .cura{display:flex;gap:12px;background:var(--ok-bg);border:1px solid var(--ok-bd);
+    border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:14.5px;color:#0f3d22}
+  .cura .lb{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--ok-tx);white-space:nowrap;padding-top:2px}
+  /* ── código ── */
+  .code{position:relative;background:#0b1f33;border-radius:10px;overflow:hidden}
+  .code pre{margin:0;padding:17px 19px;overflow-x:auto;font-family:var(--mono);
+    font-size:12.6px;line-height:1.62;color:#c7d0dc;white-space:pre}
+  .code .k{color:#b9b4ff}.code .s{color:#8ee6c0}.code .c{color:#5a7189}.code .f{color:#f9a8d4}
+  .copy{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.09);color:#c7d0dc;
+    border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 11px;font:inherit;
+    font-size:11.5px;font-weight:500;cursor:pointer}
+  .copy:hover{background:rgba(255,255,255,.18);color:#fff}
+  .copy.done{background:var(--ok-bg);color:var(--ok-tx);border-color:var(--ok-bd)}
+  /* ── laboratorio ── */
+  .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .fbtn{appearance:none;font:inherit;font-size:13.5px;cursor:pointer;padding:8px 16px;
+    border-radius:9999px;border:1px solid var(--line);background:var(--canvas);color:var(--ink-2)}
+  .fbtn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .q{background:var(--canvas);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+  .q > summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;align-items:center;gap:14px}
+  .q > summary::-webkit-details-marker{display:none}
+  .q[open] > summary{border-bottom:1px solid var(--line)}
+  .verd{flex:none;width:11px;height:11px;border-radius:50%}
+  .verd.rojo{background:var(--ruby)}.verd.ambar{background:#e8a33d}.verd.verde{background:#27a644}
+  .q .qt{flex:1;font-weight:500;font-size:15.5px}
+  .q .tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
+    padding:4px 10px;border-radius:9999px;flex:none}
+  .tag.rojo{background:var(--bad-bg);color:var(--bad-tx)}
+  .tag.ambar{background:var(--warn-bg);color:var(--warn-tx)}
+  .tag.verde{background:var(--ok-bg);color:var(--ok-tx)}
+  .answer{padding:18px 20px}
+  .bubble{border-radius:11px;padding:13px 16px;font-size:14.8px;margin-bottom:14px;border:1px solid}
+  .bubble.rojo{background:var(--bad-bg);border-color:var(--bad-bd)}
+  .bubble.ambar{background:var(--warn-bg);border-color:var(--warn-bd)}
+  .bubble.verde{background:var(--ok-bg);border-color:var(--ok-bd)}
+  .bubble .who{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    opacity:.65;display:block;margin-bottom:5px}
+  .why{font-size:14.5px;color:var(--ink-2);margin-bottom:14px}
+  .why b{color:var(--ink)}
+  /* ── antes / después ── */
+  .ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+  .ba .side{border-radius:14px;padding:26px;border:1px solid}
+  .ba .side.b{background:var(--bad-bg);border-color:var(--bad-bd)}
+  .ba .side.a{background:var(--ok-bg);border-color:var(--ok-bd)}
+  .ba .lbl{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:10px}
+  .ba .b .lbl{color:var(--bad-tx)}.ba .a .lbl{color:var(--ok-tx)}
+  .ba .big{font-weight:600;font-size:32px;letter-spacing:-.9px;margin-bottom:10px}
+  .ba p{font-size:14.5px;color:var(--ink-2)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px}
+  .kpi{background:var(--canvas);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+  .kpi .v{font-weight:600;font-size:23px;letter-spacing:-.5px}
+  .kpi .l{font-size:12.5px;color:var(--ink-mute);margin-top:3px}
+  /* accesos directos */
+  .go{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+  .go a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    background:var(--canvas);border:1px solid var(--line);border-radius:9999px;
+    padding:9px 16px;font-size:13.5px;font-weight:500;color:var(--ink);transition:.15s}
+  .go a:hover{border-color:var(--primary);color:var(--primary);
+    box-shadow:0 2px 10px rgba(83,58,253,.12)}
+  .go a .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .go a .dot.crudo{background:var(--ruby)}
+  .go a .dot.curado{background:#27a644}
+  .go a .dot.neutro{background:var(--ink-mute)}
+  .go a::after{content:"↗";font-size:11px;opacity:.45}
+  /* enlace dentro de cada capa */
+  .dbl{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;
+    padding-top:15px;border-top:1px dashed var(--line)}
+  .dbl a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+    font-size:13px;font-weight:500;color:var(--primary);
+    background:#f3f1ff;border:1px solid #d8d2ff;border-radius:8px;padding:7px 13px}
+  .dbl a:hover{background:#e9e5ff}
+  .dbl a::after{content:"↗";font-size:10px;opacity:.5}
+  .dbl a.crudo{color:var(--bad-tx);background:var(--bad-bg);border-color:var(--bad-bd)}
+  .dbl a.crudo:hover{background:#ffe3ea}
+  .dbl .hint2{font-size:12.5px;color:var(--ink-mute);align-self:center}
+  /* ficha del negocio */
+  .neg{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:20px}
+  .neg .b{background:var(--canvas);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .neg .b h3{font-size:16px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .neg .b h3 .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+    background:#efeaff;color:var(--primary-deep);font-size:13px;flex:none}
+  .neg .b p{font-size:14.5px;color:var(--ink-2)}
+  .neg .b ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+  .neg .b li{font-size:14px;color:var(--ink-2);padding-left:18px;position:relative}
+  .neg .b li::before{content:"·";position:absolute;left:6px;color:var(--primary);font-weight:700}
+  .esquema{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .esq{border-radius:14px;padding:20px;border:1px solid}
+  .esq.h{background:linear-gradient(180deg,#f3f1ff,#fff);border-color:#d8d2ff}
+  .esq.d{background:var(--canvas);border-color:var(--line)}
+  .esq .lb{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:12px}
+  .esq.h .lb{color:var(--primary-deep)} .esq.d .lb{color:var(--ink-mute)}
+  .esq .it{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .esq .it:last-child{border-bottom:0}
+  .esq .it code{font-family:var(--mono);font-size:13px;color:var(--ink)}
+  .esq .it .n{color:var(--ink-mute);font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .aviso{display:flex;gap:12px;background:var(--bad-bg);border:1px solid var(--bad-bd);
+    border-radius:12px;padding:16px 20px;margin-top:18px;font-size:15px;color:#5c1024}
+  .aviso .lb{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--bad-tx);white-space:nowrap;padding-top:2px}
+  /* A/B multiple */
+  .abq{background:var(--canvas);border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;margin-bottom:14px}
+  .abq .pregunta{font-size:16.5px;font-weight:600;letter-spacing:-.2px;margin-bottom:14px;
+    display:flex;align-items:flex-start;gap:10px}
+  .abq .pregunta .st{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    padding:4px 9px;border-radius:9999px;flex:none;margin-top:2px}
+  .st.gana{background:var(--ok-bg);color:var(--ok-tx)}
+  .st.pierde{background:var(--warn-bg);color:var(--warn-tx)}
+  .par{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .lado{border-radius:11px;padding:16px 18px;border:1px solid}
+  .lado.mal{background:var(--bad-bg);border-color:var(--bad-bd)}
+  .lado.bien{background:var(--ok-bg);border-color:var(--ok-bd)}
+  .lado .quien{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .lado.mal .quien{color:var(--bad-tx)} .lado.bien .quien{color:var(--ok-tx)}
+  .lado .cifra{font-weight:600;font-size:21px;letter-spacing:-.4px;margin-bottom:7px;line-height:1.2}
+  .lado.mal .cifra{color:#a3123c} .lado.bien .cifra{color:#146c37}
+  .lado p{font-size:13.8px;color:var(--ink-2);line-height:1.45}
+  footer{border-top:1px solid var(--line);background:var(--canvas);padding:26px 0;
+    font-size:13.5px;color:var(--ink-mute)}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .mark{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--ink)}
+  .mark i{width:14px;height:14px;border-radius:4px;background:var(--primary);transform:skewX(-10deg)}
+  @media (max-width:640px){ .hd{padding:32px 0 24px} .wrap{padding:0 18px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mesh"></div>
+  <div class="wrap hd">
+    <div class="eyebrow">Consola del taller · edición 2 · 14 ago 2026</div>
+    <h1>Databricks Genie<br><b>en producción</b></h1>
+    <p class="sub">Un Genie crudo no falla por tonto. Falla porque no sabe nada de tu negocio — y cuando no sabe, no se calla: inventa. Acá están el modelo, las seis capas que lo curan, las respuestas reales del ensayo y <b>los tres dominios</b> que muestran que cada uno tiene su propia trampa.</p>
+    <div class="meta">
+      <span class="chip">Dataset <b>Neptuno</b> · alimentos gourmet</span>
+      <span class="chip"><b>830</b> pedidos · <b>2.155</b> líneas</span>
+      <span class="chip">jul 2024 → may 2026 · corte <b>2026-05-06</b></span>
+      <span class="chip"><b>Databricks on AWS</b> · us-west-2</span>
+      <span class="chip"><b>4</b> Genie spaces</span>
+    </div>
+    <div class="go">
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/genie/rooms/01f1979ee629133bb42428d55e433cff" target="_blank" rel="noopener"><span class="dot crudo"></span>Ventas <b>crudo</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/genie/rooms/01f197a3c2c51e0493319fcefc5fb835" target="_blank" rel="noopener"><span class="dot curado"></span>Ventas <b>curado</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/genie/rooms/01f197a1f44d173a824fb4810124d4c6" target="_blank" rel="noopener"><span class="dot curado"></span><b>Inventario</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/genie/rooms/01f197a566ab13499bbdfd31a9bb6e9e" target="_blank" rel="noopener"><span class="dot curado"></span><b>Radar comercial</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/explore/data/neptuno/ventas" target="_blank" rel="noopener"><span class="dot crudo"></span>Catálogo <b>sin capas</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/explore/data/neptuno_ai/ventas" target="_blank" rel="noopener"><span class="dot curado"></span>Catálogo <b>con capas</b></a>
+      <a href="https://dbc-fba20ab2-d1fc.cloud.databricks.com/sql/editor" target="_blank" rel="noopener"><span class="dot neutro"></span>SQL Editor</a>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="negocio">El negocio</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="modelo">El modelo y sus trampas</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="capas">Las 6 capas</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="lab">Laboratorio de preguntas</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="resultado">Antes y después</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="dominios">Los otros dominios</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ═══ NEGOCIO ═══ -->
+<section class="panel" id="p-negocio">
+  <h2 class="sec">Neptuno, <b>importador de alimentos gourmet</b></h2>
+  <p class="lead">Una empresa ficticia pero con datos de verdad: es Northwind traducido al español, el modelo de ventas más usado del mundo para enseñar. Lo elegimos porque el esquema y los valores están en español, así las preguntas al Genie suenan como las haría un negocio real.</p>
+
+  <div class="neg">
+    <div class="b">
+      <h3><span class="ic">🏢</span> A qué se dedica</h3>
+      <p>Compra alimentos gourmet a productores del mundo y los distribuye al por mayor. No vende al consumidor final: sus clientes son <b>empresas</b> — restaurantes, tiendas delicatessen y distribuidores.</p>
+      <ul>
+        <li><b>29 proveedores</b> en Europa, América y Asia</li>
+        <li><b>91 clientes</b> empresa en 21 países</li>
+        <li><b>9 empleados</b> entre ventas y administración</li>
+        <li><b>3 transportistas</b> que entregan los pedidos</li>
+      </ul>
+    </div>
+    <div class="b">
+      <h3><span class="ic">📦</span> Qué vende</h3>
+      <p><b>77 productos</b> repartidos en <b>8 categorías</b>. De ellos, <b>67 están vigentes</b> y 10 fueron descontinuados — esa distinción no está explicada en ninguna parte del esquema, y es una de las trampas.</p>
+      <ul>
+        <li>Bebidas · Condimentos · Repostería · Lácteos</li>
+        <li>Granos y Cereales · Carnes y Aves</li>
+        <li>Frutas y Verduras · Pescados y Mariscos</li>
+      </ul>
+    </div>
+    <div class="b">
+      <h3><span class="ic">📈</span> Qué volumen mueve</h3>
+      <p>El histórico va de <b>julio 2024 a mayo 2026</b>. El único año completo es <b>2025</b> — por eso «el año pasado» siempre significa 2025, y comparar contra 2026 es comparar doce meses contra cinco.</p>
+      <ul>
+        <li><b>830 pedidos</b> · <b>2.155 líneas</b> de detalle</li>
+        <li>Venta neta 2025: <b>US$ 617.085,20</b></li>
+        <li>Ticket promedio 2025: <b>US$ 1.512,46</b></li>
+        <li>Categoría líder: <b>Lácteos</b> (115.387,64)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="sec" style="font-size:23px;margin-top:32px">Modelo estrella: <b>dos hechos, seis dimensiones</b></h2>
+  <p class="lead">La estructura clásica de ventas. Un pedido tiene una cabecera y varias líneas; cada línea apunta a un producto.</p>
+  <div class="esquema">
+    <div class="esq h">
+      <div class="lb">Tablas de hechos</div>
+      <div class="it"><div><code>pedidos</code><br><span style="font-size:13px;color:var(--ink-mute)">Cabecera: quién compró, cuándo, quién vendió, cómo se envió</span></div><span class="n">830</span></div>
+      <div class="it"><div><code>detalles_pedidos</code><br><span style="font-size:13px;color:var(--ink-mute)">Grano fino: qué producto, cuántas unidades, a qué precio y con qué descuento</span></div><span class="n">2.155</span></div>
+    </div>
+    <div class="esq d">
+      <div class="lb">Dimensiones</div>
+      <div class="it"><div><code>productos</code> <span style="font-size:13px;color:var(--ink-mute)">→ categorias, proveedores</span></div><span class="n">77</span></div>
+      <div class="it"><div><code>categorias</code></div><span class="n">8</span></div>
+      <div class="it"><div><code>clientes</code></div><span class="n">91</span></div>
+      <div class="it"><div><code>empleados</code> <span style="font-size:13px;color:var(--ink-mute)">jerarquía por JefeId</span></div><span class="n">9</span></div>
+      <div class="it"><div><code>proveedores</code></div><span class="n">29</span></div>
+      <div class="it"><div><code>transportistas</code></div><span class="n">3</span></div>
+    </div>
+  </div>
+
+  <div class="aviso">
+    <span class="lb">Lo que NO tiene</span>
+    <span>Neptuno registra a qué <b>precio vendió</b>, pero nunca cuánto le <b>costó</b> la mercadería. Sin costos no existe el margen, ni la utilidad, ni la rentabilidad. Todo el webinar gira alrededor de esa ausencia: un Genie sin contexto no la ve, y en vez de decirlo, se inventa una respuesta.</span>
+  </div>
+</section>
+
+<!-- ═══ MODELO ═══ -->
+<section class="panel" id="p-modelo" hidden>
+  <h2 class="sec">Un modelo estrella normal, con <b>trampas normales</b></h2>
+  <p class="lead">Nada acá está saboteado: son las ambigüedades que tiene cualquier modelo real. Las columnas en <span style="color:var(--bad-tx);font-weight:600">rojo</span> son las que hacen fallar al Genie si nadie se las explica. Pasá el cursor por encima.</p>
+  <div class="grid g2">
+    <div class="card tbl">
+      <h3>detalles_pedidos <span class="kind hecho">Hecho</span></h3>
+      <div class="rows">2.155 filas · grano: producto dentro de un pedido</div>
+      <div class="cols">
+        <span class="col key">IdPedido</span><span class="col key">IdProducto</span>
+        <span class="col trap" title="Precio HISTÓRICO de venta. Existe otra columna con el mismo nombre en productos (precio de catálogo). Confundirlas es lo que produce el margen falso.">PrecioUnidad ⚠</span>
+        <span class="col">Cantidad</span>
+        <span class="col trap" title="Va de 0 a 1 (0.15 = 15%). Si no se resta, la venta queda inflada. 838 de 2.155 líneas tienen descuento.">Descuento ⚠</span>
+      </div>
+    </div>
+    <div class="card tbl">
+      <h3>pedidos <span class="kind hecho">Hecho</span></h3>
+      <div class="rows">830 filas · grano: un pedido</div>
+      <div class="cols">
+        <span class="col key">IdPedido</span><span class="col key">IdCliente</span><span class="col key">IdEmpleado</span>
+        <span class="col trap" title="La fecha correcta para analizar ventas.">FechaPedido ⚠</span>
+        <span class="col trap" title="Fecha de salida del almacén. NULL en 21 pedidos. Usarla para ventas cambia el resultado.">FechaEnvio ⚠</span>
+        <span class="col">FechaEntrega</span>
+        <span class="col trap" title="Es el COSTO del flete, no un ingreso. Sumarlo a las ventas las infla.">Cargo ⚠</span>
+        <span class="col key">IdTransportista</span><span class="col">PaisDestinatario</span>
+      </div>
+    </div>
+    <div class="card tbl">
+      <h3>productos <span class="kind">Dimensión</span></h3>
+      <div class="rows">77 filas</div>
+      <div class="cols">
+        <span class="col key">IdProducto</span><span class="col">NombreProducto</span>
+        <span class="col key">IdCategoria</span><span class="col key">IdProveedor</span>
+        <span class="col trap" title="Precio de lista ACTUAL. No es un costo y no sirve para ventas históricas. Restarlo contra el precio de venta produce un «margen» que no existe.">PrecioUnidad ⚠</span>
+        <span class="col trap" title="1 = descontinuado, 0 = activo. Sin explicar, nadie sabe si contar los 77 o los 67 vigentes.">Suspendido ⚠</span>
+        <span class="col">UnidadesEnExistencia</span>
+      </div>
+    </div>
+    <div class="card tbl">
+      <h3>categorias · clientes · empleados <span class="kind">Dimensiones</span></h3>
+      <div class="rows">8 · 91 · 9 filas</div>
+      <div class="cols">
+        <span class="col key">IdCategoria</span><span class="col">NombreCategoria</span>
+        <span class="col key">IdCliente</span><span class="col">NombreCompania</span><span class="col">Pais</span>
+        <span class="col key">IdEmpleado</span><span class="col">Cargo</span>
+        <span class="col trap" title="No existe ninguna columna «activo». Es una convención de negocio que el modelo tiene que inventarse — y se la inventa.">¿cliente activo? ⚠</span>
+      </div>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="v">39%</div><div class="l">de las líneas tienen descuento</div></div>
+    <div class="kpi"><div class="v">2</div><div class="l">columnas se llaman <code>PrecioUnidad</code></div></div>
+    <div class="kpi"><div class="v">21</div><div class="l">pedidos sin fecha de envío</div></div>
+    <div class="kpi"><div class="v">0</div><div class="l">columnas de costo → no hay margen</div></div>
+  </div>
+</section>
+
+<!-- ═══ CAPAS ═══ -->
+<section class="panel" id="p-capas" hidden>
+  <h2 class="sec">Seis capas, de <b>menor esfuerzo a mayor impacto</b></h2>
+  <p class="lead">Se aplican en este orden. Empezar por la 5 sin la 1 es optimizar algo que todavía no sabe qué es una venta. Cada bloque de SQL es copiable.</p>
+
+  <details class="layer" open>
+    <summary><span class="num">1</span><span class="t"><span class="h">Metadatos en Unity Catalog</span><span class="d">El <code>COMMENT</code> es la capa más barata que existe y la que todos se saltan.</span></span><span class="where sql">SQL</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>El margen inventado y la confusión entre las dos columnas <code>PrecioUnidad</code>.</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">COMMENT ON TABLE</span> neptuno.ventas.detalles_pedidos <span class="k">IS</span>
+  <span class="s">'Hecho a nivel de línea: una fila = un producto dentro de un pedido.
+   El ingreso NO es PrecioUnidad*Cantidad: hay que aplicar el Descuento.
+   PrecioUnidad aquí es el precio HISTÓRICO de venta.'</span>;
+
+<span class="k">ALTER TABLE</span> neptuno.ventas.productos <span class="k">ALTER COLUMN</span> PrecioUnidad <span class="k">COMMENT</span>
+  <span class="s">'Precio de lista actual. NO es un costo: el modelo no tiene costo de
+   mercadería, por lo que NO se puede calcular margen ni utilidad.'</span>;
+
+<span class="k">ALTER TABLE</span> neptuno.ventas.pedidos <span class="k">ALTER COLUMN</span> Cargo <span class="k">COMMENT</span>
+  <span class="s">'Costo de flete del pedido. Es un COSTO, no un ingreso:
+   nunca se suma a las ventas.'</span>;</pre></div>
+      <div class="dbl">
+        <a class="crudo" href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno/ventas/detalles_pedidos?o=7405605532711466" target="_blank" rel="noopener">Ver la tabla SIN comentarios</a>
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno_ai/ventas/detalles_pedidos?o=7405605532711466" target="_blank" rel="noopener">Ver la tabla CON comentarios</a>
+      </div>
+    </div>
+  </details>
+
+  <details class="layer">
+    <summary><span class="num">2</span><span class="t"><span class="h">Instrucciones del space</span><span class="d">De qué negocio hablamos, qué asumir por defecto y qué NO responder.</span></span><span class="where ui">UI del space</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>El idioma, la ambigüedad de fechas y las preguntas que no se pueden responder.</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre>Neptuno importa y distribuye alimentos gourmet a clientes empresa.
+Responde siempre en español.
+
+DEFINICIONES
+- "Ventas", "facturación" e "ingresos" son la misma métrica: la venta neta.
+- Venta neta = PrecioUnidad * Cantidad * (1 - Descuento), con el
+  PrecioUnidad de detalles_pedidos (histórico), nunca el de productos.
+- Cargo es flete: es un costo, NUNCA se suma a las ventas.
+- No tenemos costo de mercadería: NO calcules margen ni utilidad.
+  Si te lo piden, dilo explícitamente en vez de estimarlo.
+
+FECHAS
+- Por defecto usa FechaPedido, no FechaEnvio ni FechaEntrega.
+- Los datos van de julio 2024 a mayo 2026. "El año pasado" = 2025.
+- 2026 es un año PARCIAL: al compararlo con 2025, advierte que no
+  es comparable.</pre></div>
+      <div class="dbl">
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/genie/rooms/01f186ec8f4b17aba9314fd588aa839b?o=7405605532711466&sp=context.instructions" target="_blank" rel="noopener">Abrir Instructions del space curado</a>
+      </div>
+    </div>
+  </details>
+
+  <details class="layer">
+    <summary><span class="num">3</span><span class="t"><span class="h">SQL curado · trusted queries</span><span class="d">La que más mueve la aguja: le enseñás la respuesta correcta una sola vez.</span></span><span class="where ui">UI del space</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>La métrica deja de improvisarse: hay una versión oficial y el Genie la imita.</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="c">-- «venta neta por categoría y año»</span>
+<span class="k">SELECT</span> c.NombreCategoria,
+       <span class="k">YEAR</span>(p.FechaPedido) <span class="k">AS</span> anio,
+       <span class="f">ROUND</span>(<span class="f">SUM</span>(d.PrecioUnidad * d.Cantidad * (<span class="s">1</span> - d.Descuento)), <span class="s">2</span>) <span class="k">AS</span> venta_neta
+<span class="k">FROM</span> neptuno.ventas.detalles_pedidos d
+<span class="k">JOIN</span> neptuno.ventas.pedidos    p  <span class="k">ON</span> p.IdPedido    = d.IdPedido
+<span class="k">JOIN</span> neptuno.ventas.productos  pr <span class="k">ON</span> pr.IdProducto = d.IdProducto
+<span class="k">JOIN</span> neptuno.ventas.categorias c  <span class="k">ON</span> c.IdCategoria = pr.IdCategoria
+<span class="k">GROUP BY</span> c.NombreCategoria, <span class="k">YEAR</span>(p.FechaPedido)
+<span class="k">ORDER BY</span> anio, venta_neta <span class="k">DESC</span></pre></div>
+      <p class="why" style="margin-top:14px"><b>Regla práctica:</b> cada respuesta mala que corregís se convierte en una trusted query. Así se construye esta capa, una corrección a la vez.</p>
+      <div class="dbl">
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/genie/rooms/01f186ec8f4b17aba9314fd588aa839b?o=7405605532711466&sp=context.instructions" target="_blank" rel="noopener">SQL queries del space</a>
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/genie/rooms/01f186ec8f4b17aba9314fd588aa839b?o=7405605532711466&sp=context.examples" target="_blank" rel="noopener">Examples</a>
+      </div>
+    </div>
+  </details>
+
+  <details class="layer">
+    <summary><span class="num">4</span><span class="t"><span class="h">Sinónimos y conocimiento</span><span class="d">El vocabulario real del negocio, mapeado al esquema.</span></span><span class="where ui">UI del space</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>Las preguntas que devuelven 0 o «no encontré datos» — casi siempre es vocabulario, no datos.</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre>VOCABULARIO
+- venta / facturación / ingresos / revenue  → venta neta
+- cliente / cuenta / razón social           → clientes.NombreCompania
+- vendedor / comercial / asesor             → empleados
+- rubro / línea / familia                   → categorias.NombreCategoria
+- flete / envío (costo)                     → pedidos.Cargo
+
+DEFINICIONES
+- Cliente activo: con al menos un pedido en los últimos 12 meses.
+- Producto vigente: productos.Suspendido = 0.
+- Ticket promedio: venta neta total / número de pedidos distintos.
+
+VALORES REALES
+- Categorías: Bebidas, Condimentos, Reposteria, Lacteos,
+  Granos y Cereales, Carnes y Aves, Frutas y Verduras,
+  Pescados y Mariscos.
+- Los países están en español: Alemania, Francia, Brasil...</pre></div>
+      <div class="dbl">
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/genie/rooms/01f186ec8f4b17aba9314fd588aa839b?o=7405605532711466&sp=context.instructions" target="_blank" rel="noopener">Vocabulario en Instructions</a>
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno_ai/ventas/categorias?o=7405605532711466" target="_blank" rel="noopener">Ver valores reales de categorias</a>
+      </div>
+    </div>
+  </details>
+
+  <details class="layer">
+    <summary><span class="num">5</span><span class="t"><span class="h">UC Functions</span><span class="d">La regla de negocio deja de ser improvisable: es código gobernado.</span></span><span class="where sql">SQL</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>El drift: dos preguntas parecidas ya no devuelven dos definiciones distintas de «venta».</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">CREATE OR REPLACE FUNCTION</span> neptuno.ventas.venta_neta(
+  precio_unidad <span class="k">DECIMAL</span>(<span class="s">10</span>,<span class="s">2</span>), cantidad <span class="k">INT</span>, descuento <span class="k">DOUBLE</span>)
+<span class="k">RETURNS</span> <span class="k">DECIMAL</span>(<span class="s">18</span>,<span class="s">2</span>)
+<span class="k">COMMENT</span> <span class="s">'Ingreso neto de una línea de pedido en USD. Es la ÚNICA
+  definición válida de venta. Usar siempre para ventas,
+  facturación o ingresos.'</span>
+<span class="k">RETURN</span> <span class="k">CAST</span>(precio_unidad * cantidad * (<span class="s">1</span> - descuento) <span class="k">AS</span> <span class="k">DECIMAL</span>(<span class="s">18</span>,<span class="s">2</span>));</pre></div>
+      <p class="why" style="margin-top:14px">La misma función la reusa después tu agente como <b>tool</b> — no es trabajo desechable.</p>
+      <div class="dbl">
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/functions/neptuno_ai/ventas/venta_neta?o=7405605532711466" target="_blank" rel="noopener">Ver la función venta_neta en UC</a>
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno_ai/ventas?o=7405605532711466" target="_blank" rel="noopener">Todas las funciones del esquema</a>
+      </div>
+    </div>
+  </details>
+
+  <details class="layer">
+    <summary><span class="num">6</span><span class="t"><span class="h">Relaciones declaradas</span><span class="d">PK y FK en Unity Catalog: se acaban los caminos inventados entre tablas.</span></span><span class="where sql">SQL</span></summary>
+    <div class="body">
+      <div class="cura"><span class="lb">Cura</span><span>El JOIN silencioso que duplica filas y no rompe nada — solo infla el total.</span></div>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="c">-- el grano del hecho queda explícito con una PK compuesta</span>
+<span class="k">ALTER TABLE</span> neptuno.ventas.detalles_pedidos
+  <span class="k">ADD CONSTRAINT</span> pk_detalles <span class="k">PRIMARY KEY</span> (IdPedido, IdProducto);
+
+<span class="k">ALTER TABLE</span> neptuno.ventas.detalles_pedidos <span class="k">ADD CONSTRAINT</span> fk_det_pedido
+  <span class="k">FOREIGN KEY</span> (IdPedido) <span class="k">REFERENCES</span> neptuno.ventas.pedidos;
+<span class="k">ALTER TABLE</span> neptuno.ventas.detalles_pedidos <span class="k">ADD CONSTRAINT</span> fk_det_producto
+  <span class="k">FOREIGN KEY</span> (IdProducto) <span class="k">REFERENCES</span> neptuno.ventas.productos;
+<span class="k">ALTER TABLE</span> neptuno.ventas.productos <span class="k">ADD CONSTRAINT</span> fk_prod_categoria
+  <span class="k">FOREIGN KEY</span> (IdCategoria) <span class="k">REFERENCES</span> neptuno.ventas.categorias;</pre></div>
+      <div class="dbl">
+        <a class="crudo" href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno/ventas/detalles_pedidos?o=7405605532711466" target="_blank" rel="noopener">Tabla SIN relaciones</a>
+        <a href="https://adb-7405605532711466.6.azuredatabricks.net/explore/data/neptuno_ai/ventas/detalles_pedidos?o=7405605532711466" target="_blank" rel="noopener">Tabla CON PK/FK declaradas</a>
+      </div>
+    </div>
+  </details>
+</section>
+
+<!-- ═══ LABORATORIO ═══ -->
+<section class="panel" id="p-lab" hidden>
+  <h2 class="sec">Lo que respondió el Genie <b>sin ninguna capa</b></h2>
+  <p class="lead">Respuestas reales, capturadas por la Conversation API contra las tablas desnudas. El patrón es nítido: lo que se deduce del esquema lo calcula bien. Lo que depende de tu negocio, se lo inventa.</p>
+  <div class="filters">
+    <button class="fbtn" data-f="todas" aria-pressed="true">Todas</button>
+    <button class="fbtn" data-f="rojo" aria-pressed="false">🔴 Inventa</button>
+    <button class="fbtn" data-f="ambar" aria-pressed="false">🟠 Engaña</button>
+    <button class="fbtn" data-f="verde" aria-pressed="false">✅ Acierta</button>
+  </div>
+
+  <details class="q" data-v="rojo" open>
+    <summary><span class="verd rojo"></span><span class="qt">¿Cuál es el margen de la categoría Bebidas?</span><span class="tag rojo">Inventa</span></summary>
+    <div class="answer">
+      <div class="bubble rojo"><span class="who">Genie · sin configurar</span>El margen de la categoría <b>Bebidas</b> es <b>−23.055,30</b>. Este valor indica que las ventas de productos en la categoría Bebidas han generado una <b>pérdida</b> en lugar de una ganancia.</div>
+      <p class="why"><b>No hay costos en este modelo.</b> Restó el precio de venta contra el precio de catálogo —las dos columnas se llaman <code>PrecioUnidad</code>— y lo llamó margen. Un ejecutivo que lea esto mata la categoría.</p>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">SELECT</span> <span class="f">SUM</span>(dp.PrecioUnidad * dp.Cantidad) - <span class="f">SUM</span>(p.PrecioUnidad * dp.Cantidad) <span class="k">AS</span> Margen
+<span class="k">FROM</span> neptuno.ventas.detalles_pedidos dp
+<span class="k">JOIN</span> neptuno.ventas.productos p <span class="k">ON</span> dp.IdProducto = p.IdProducto
+<span class="k">JOIN</span> neptuno.ventas.categorias c <span class="k">ON</span> p.IdCategoria = c.IdCategoria
+<span class="k">WHERE</span> c.NombreCategoria = <span class="s">'Bebidas'</span></pre></div>
+    </div>
+  </details>
+
+  <details class="q" data-v="ambar">
+    <summary><span class="verd ambar"></span><span class="qt">¿Cuántos clientes activos tenemos?</span><span class="tag ambar">Engaña</span></summary>
+    <div class="answer">
+      <div class="bubble ambar"><span class="who">Genie · sin configurar</span>El número de clientes activos es <b>89</b> según los datos de pedidos con un IdCliente válido.</div>
+      <p class="why"><b>«Activo» no existe en el modelo</b> — es una convención de negocio. Genie la inventó como «alguna vez pidió». Con la definición real (pedido en los últimos 12 meses) son <b>87</b>. Nadie discute un número que suena razonable.</p>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">SELECT</span> <span class="f">COUNT</span>(<span class="k">DISTINCT</span> pedidos.IdCliente) <span class="k">AS</span> clientes_activos
+<span class="k">FROM</span> neptuno.ventas.pedidos
+<span class="k">WHERE</span> pedidos.IdCliente <span class="k">IS NOT NULL</span>;</pre></div>
+    </div>
+  </details>
+
+  <details class="q" data-v="ambar">
+    <summary><span class="verd ambar"></span><span class="qt">Compara las ventas de este año contra el año pasado</span><span class="tag ambar">Engaña</span></summary>
+    <div class="answer">
+      <div class="bubble ambar"><span class="who">Genie · sin configurar</span>2026: <b>440.623,87</b> · 2025: <b>617.085,20</b></div>
+      <p class="why"><b>2026 tiene cinco meses de datos; 2025 tiene doce.</b> La comparación sugiere una caída del 29% que no existe. Genie no lo advierte porque nadie le dijo hasta dónde llegan los datos.</p>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">SELECT</span> <span class="k">YEAR</span>(p.FechaPedido) <span class="k">AS</span> anio,
+       <span class="f">SUM</span>(d.PrecioUnidad * d.Cantidad * (<span class="s">1</span> - d.Descuento)) <span class="k">AS</span> total_ventas
+<span class="k">FROM</span> neptuno.ventas.pedidos p
+<span class="k">JOIN</span> neptuno.ventas.detalles_pedidos d <span class="k">ON</span> p.IdPedido = d.IdPedido
+<span class="k">WHERE</span> <span class="k">YEAR</span>(p.FechaPedido) <span class="k">IN</span> (<span class="k">YEAR</span>(<span class="f">CURRENT_DATE</span>()), <span class="k">YEAR</span>(<span class="f">CURRENT_DATE</span>())-<span class="s">1</span>)
+<span class="k">GROUP BY</span> <span class="k">YEAR</span>(p.FechaPedido)</pre></div>
+    </div>
+  </details>
+
+  <details class="q" data-v="verde">
+    <summary><span class="verd verde"></span><span class="qt">¿Cuánto vendimos de la categoría Bebidas el año pasado?</span><span class="tag verde">Acierta</span></summary>
+    <div class="answer">
+      <div class="bubble verde"><span class="who">Genie · sin configurar</span>Las ventas de la categoría <b>Bebidas en 2025</b> fueron de <b>103.924,31</b>.</div>
+      <p class="why">Aplicó el descuento solo, usó <code>FechaPedido</code> y resolvió «el año pasado» con <code>YEAR(CURRENT_DATE)-1</code>. <b>El text-to-SQL de 2026 ya resuelve esto sin ayuda</b> — por eso las trampas de cálculo ya no son el argumento.</p>
+      <div class="code"><button class="copy">Copiar</button><pre><span class="k">SELECT</span> <span class="f">SUM</span>(dp.PrecioUnidad * dp.Cantidad * (<span class="s">1</span> - dp.Descuento))
+<span class="k">FROM</span> neptuno.ventas.detalles_pedidos dp
+<span class="k">JOIN</span> neptuno.ventas.productos p   <span class="k">ON</span> dp.IdProducto = p.IdProducto
+<span class="k">JOIN</span> neptuno.ventas.categorias c  <span class="k">ON</span> p.IdCategoria = c.IdCategoria
+<span class="k">JOIN</span> neptuno.ventas.pedidos pe    <span class="k">ON</span> dp.IdPedido = pe.IdPedido
+<span class="k">WHERE</span> c.NombreCategoria = <span class="s">'Bebidas'</span>
+  <span class="k">AND</span> <span class="k">YEAR</span>(pe.FechaPedido) = <span class="k">YEAR</span>(<span class="f">CURRENT_DATE</span>) - <span class="s">1</span></pre></div>
+    </div>
+  </details>
+
+  <details class="q" data-v="verde">
+    <summary><span class="verd verde"></span><span class="qt">¿Cuántos productos tenemos a la venta?</span><span class="tag verde">Acierta</span></summary>
+    <div class="answer">
+      <div class="bubble verde"><span class="who">Genie · sin configurar</span>Actualmente hay <b>67 productos</b> a la venta, según el registro de productos con «Suspendido = 0».</div>
+      <p class="why">Dedujo solo que <code>Suspendido</code> es un flag y que 0 significa vigente. De 77 productos, 10 están descontinuados.</p>
+    </div>
+  </details>
+
+  <details class="q" data-v="verde">
+    <summary><span class="verd verde"></span><span class="qt">¿Cuánto facturamos en total el año pasado?</span><span class="tag verde">Acierta</span></summary>
+    <div class="answer">
+      <div class="bubble verde"><span class="who">Genie · sin configurar</span>El total facturado el año pasado fue de <b>617.085,20</b>, considerando descuentos aplicados.</div>
+      <p class="why">Entendió «facturar» como venta neta y <b>no sumó el <code>Cargo</code></b> (flete) al ingreso. Correcto.</p>
+    </div>
+  </details>
+
+  <details class="q" data-v="verde">
+    <summary><span class="verd verde"></span><span class="qt">¿Cuál es nuestro mejor cliente?</span><span class="tag verde">Acierta</span></summary>
+    <div class="answer">
+      <div class="bubble verde"><span class="who">Genie · sin configurar</span>El mejor cliente es <b>QUICK-Stop</b>, con un total de ventas de <b>110.277,31</b>.</div>
+      <p class="why">Resolvió «mejor» como mayor venta neta acumulada. Defendible — aunque tu negocio quizá defina «mejor» por margen o por recurrencia. Ahí entra la capa 4.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ═══ RESULTADO ═══ -->
+<section class="panel" id="p-resultado" hidden>
+  <h2 class="sec">La misma pregunta, <b>a los dos Genies</b></h2>
+  <p class="lead">Seis preguntas idénticas lanzadas a los dos spaces por la Conversation API. Mismas tablas, mismos datos: lo único que cambia son las capas. Incluida la que el curado responde peor — porque eso también hay que mostrarlo.</p>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Cuál es la rentabilidad por categoría?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Crudo</div><div class="cifra">Las 8 categorías «en pérdida»</div>
+        <p>Bebidas −41.714,07 · Lácteos −34.621,01 · Carnes −27.660,33… Un tablero completo de números rojos, inventado restando el precio de venta contra el de catálogo. Con esto se cierra una línea de negocio.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">«No es posible»</div>
+        <p>«No tenemos el costo de mercadería en los datos. Puedo mostrarte la venta neta por categoría si lo deseas.»</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Cuál es el margen de la categoría Bebidas?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Crudo · dos respuestas distintas</div><div class="cifra">−23.055,30 … y luego +267.868,18</div>
+        <p>La misma pregunta, dos veces, dos cifras incompatibles. La segunda es la venta neta histórica con la etiqueta «margen». Ninguna de las dos es un margen. <b>Ni siquiera es reproducible.</b></p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">«No puedo»</div>
+        <p>Se niega, explica que falta el costo de mercadería y ofrece la venta neta —US$ 103.924,32— con su SQL trazable.</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Cuántos clientes activos tenemos?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Crudo</div><div class="cifra">89</div>
+        <p>Inventó que «activo» significa «alguna vez compró». Cuenta clientes que no pidieron nada en dos años.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">87</div>
+        <p>«Al menos un pedido en los últimos 12 meses (desde el 23 de julio de 2025)» — la definición del negocio, no la del modelo.</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>Compara las ventas de este año contra el año pasado</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Crudo</div><div class="cifra">2026: 440.623 · 2025: 617.085</div>
+        <p>Suelta los dos números sin una palabra de advertencia. Sugiere una caída del 29% que no existe: 2026 solo tiene cinco meses.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">Repregunta antes de responder</div>
+        <p>«¿Prefieres comparar el año completo 2025 con 2026 estimado, o solo hasta mayo de 2026 como está ahora?» Detectó solo que el período está incompleto.</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Cuál es el precio promedio de nuestros productos?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Crudo</div><div class="cifra">US$ 28,83</div>
+        <p>Promedia los 77 productos, incluidos los 10 descontinuados que ya nadie puede comprar.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">US$ 26,94</div>
+        <p>«El precio promedio de los productos <b>vigentes</b>» — filtró <code>Suspendido = 0</code> porque la capa 4 define qué es un producto vigente.</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st pierde">Aquí pierde el curado</span>¿Cuántas ventas llevamos este mes?</div>
+    <div class="par">
+      <div class="lado bien"><div class="quien">Crudo · acierta</div><div class="cifra">0</div>
+        <p>«No se han realizado ventas hasta la fecha en este mes.» Correcto: los datos terminan en mayo de 2026.</p></div>
+      <div class="lado mal"><div class="quien">Curado · falla</div><div class="cifra">US$ 18.333,63</div>
+        <p>Dice «hasta la fecha en julio de 2026», pero esa cifra son las ventas de <b>mayo</b>. La instrucción «los datos van hasta mayo 2026» lo llevó a devolver el último mes disponible y etiquetarlo como el actual.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px;padding:24px">
+    <p style="font-size:19px;font-weight:300;letter-spacing:-.3px;line-height:1.45">
+      Las capas curan el 80% y ese último caso lo prueba: <b style="font-weight:600">una instrucción puede introducir su propio error</b>. Por eso después de las seis capas viene la séptima, la que casi nadie hace — <b style="font-weight:600">evaluar</b>. Sin un set de preguntas con respuesta esperada, esa desviación no la detectas nunca.
+    </p>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">617.085,20</div><div class="l">venta neta 2025 (USD)</div></div>
+    <div class="kpi"><div class="v">Lacteos</div><div class="l">categoría #1 · 115.387,64</div></div>
+    <div class="kpi"><div class="v">87</div><div class="l">clientes activos reales (12m)</div></div>
+    <div class="kpi"><div class="v">67 / 77</div><div class="l">productos vigentes</div></div>
+  </div>
+</section>
+
+<!-- ═══ OTROS DOMINIOS (nuevo en la edición 2) ═══ -->
+<section class="panel" id="p-dominios" hidden>
+  <h2 class="sec">Un Genie curado no alcanza: <b>cada dominio tiene su propia trampa</b></h2>
+  <p class="lead">Las seis capas curan <b>un</b> dominio. En cuanto entra el segundo, descubres que la trampa de ventas (una métrica que no existe) no se parece en nada a la de inventario (una columna olvidada) ni a la del radar comercial (una comparación injusta). Por eso hoy hay cuatro spaces y no uno.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">4</div><div class="l">Genie spaces · 1 crudo, 3 curados</div></div>
+    <div class="kpi"><div class="v">3</div><div class="l">dominios con datos reales</div></div>
+    <div class="kpi"><div class="v">21</div><div class="l">preguntas ejecutadas y transcritas</div></div>
+    <div class="kpi"><div class="v">100%</div><div class="l">spaces creados por API, sin un clic</div></div>
+  </div>
+
+  <div class="card" style="margin-top:22px;padding:24px">
+    <p style="font-size:19px;font-weight:300;letter-spacing:-.3px;line-height:1.45">
+      La regla que salió de armarlos: los <b style="font-weight:600">COMMENT son globales al metastore</b> y las <b style="font-weight:600">instrucciones son locales al space</b>. Si documentas <code>neptuno</code> para curar inventario, curas también el Genie del Demo&nbsp;0 y te quedas sin demo. Por eso todo lo curado vive en <code>neptuno_ai</code>, un catálogo clonado, y solo el crudo se queda en <code>neptuno</code>.
+    </p>
+  </div>
+
+  <h2 class="sec" style="font-size:23px;margin-top:34px">Inventario — <b>la columna que nadie explicó</b></h2>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Qué productos tengo que reponer?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Sin curar</div><div class="cifra">17 productos</div>
+        <p>Compara <code>UnidadesEnExistencia</code> contra el punto de pedido y se olvida de <code>UnidadesEnPedido</code>: <b>lo que ya está comprado y viene en camino</b>. 15 de esos 17 ya tienen reposición pedida.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">2 productos</div>
+        <p>Suma el stock disponible <b>más</b> lo que está por llegar, y descarta los <code>Suspendido = 1</code>: no tiene sentido reponer lo descontinuado.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:24px">
+    <p style="font-size:19px;font-weight:300;letter-spacing:-.3px;line-height:1.45">
+      El error cuesta <b style="font-weight:600">comprar ocho veces lo que hacía falta</b>. Y no es un bug de SQL: el SQL está perfecto. Es una columna del modelo que nunca se documentó.
+    </p>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:24px">
+    <p style="font-size:16px;line-height:1.55">
+      <b>El hueco que apareció al mover este space:</b> <code>capas.sql</code> documenta el modelo <b>desde la óptica de ventas</b> y deja <code>UnidadesEnPedido</code> y <code>NivelNuevoPedido</code> sin comentar — justo las dos de las que depende toda la reposición. Lo cierra <code>capas-inventario.sql</code>, que se aplica <b>solo a <code>neptuno_ai</code></b>. Moraleja: la capa 1 no es «documentar las tablas», es <b>documentar las tablas para las preguntas que va a recibir este space</b>.
+    </p>
+  </div>
+
+  <h2 class="sec" style="font-size:23px;margin-top:34px">Radar comercial — <b>la comparación injusta</b></h2>
+
+  <div class="abq">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Qué clientes se están cayendo?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Comparando año vs año</div><div class="cifra">48 de 79 «caen»</div>
+        <p>Los datos cortan el <b>2026-05-06</b>: 2026 tiene cinco meses y 2025 tiene doce. Comparar los totales hace que casi todo el mundo parezca en caída. ~25 falsas alarmas.</p></div>
+      <div class="lado bien"><div class="quien">Curado · mismo rango de meses</div><div class="cifra">23 clientes</div>
+        <p>«Comparando <b>enero-mayo 2026 vs enero-mayo 2025</b>…» — y <b>lo dice en la respuesta</b>. Simons bistro −97,9 % · Wartian Herkku −96,0 % · Furia Bacalhau −98,4 %.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:24px">
+    <p style="font-size:19px;font-weight:300;letter-spacing:-.3px;line-height:1.45">
+      Un radar que dispara <b style="font-weight:600">48 alertas cuando hay 23 problemas</b> se apaga solo: el equipo comercial verifica cinco, encuentra que tres no eran nada, y a la segunda semana deja de abrirlo. El sistema no falló — <b style="font-weight:600">perdió la confianza</b>, que es peor y no se recupera.
+    </p>
+  </div>
+
+  <div class="abq" style="margin-top:22px">
+    <div class="pregunta"><span class="st gana">Cura</span>¿Qué categorías están cayendo este año?</div>
+    <div class="par">
+      <div class="lado mal"><div class="quien">Lo que haría un sistema complaciente</div><div class="cifra">Un ranking de «caídas»</div>
+        <p>La pregunta <b>presupone</b> que hay categorías cayendo. Un sistema que quiere agradar devuelve las que menos crecen y las presenta como caídas. Nadie lo cuestiona: el usuario ya venía convencido.</p></div>
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">«Ninguna»</div>
+        <p>«Ninguna categoría muestra una caída en 2026 (enero-mayo) frente al mismo periodo de 2025; todas presentan crecimiento.» Condimentos +36,4 % … Pescados y Mariscos +158,5 %.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:24px">
+    <p style="font-size:16px;line-height:1.55">
+      Y es el contraejemplo perfecto del año parcial: comparando <b>2026 completo contra 2025 completo</b>, <b>todas</b> las categorías «caerían». La comparación justa <b>invierte el veredicto entero</b>. El mismo dato, la misma pregunta, dos conclusiones opuestas — y la única diferencia es una capa.
+    </p>
+  </div>
+
+  <h2 class="sec" style="font-size:23px;margin-top:34px">Las otras tres del radar, ya verificadas</h2>
+
+  <div class="abq">
+    <div class="pregunta">¿Qué clientes dejaron de comprar?</div>
+    <div class="par">
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">Centro comercial Moctezuma</div>
+        <p>Última compra 18-jul-2024, <b>657 días</b> sin comprar. La inactividad se mide contra el <b>corte de datos</b> (<code>MAX(FechaPedido)</code>), nunca contra <code>CURRENT_DATE</code> — hay 100 días de desfase que borrarían actividad real.</p></div>
+      <div class="lado bien"><div class="quien">¿Y el transportista más atrasado?</div><div class="cifra">Paquetes Unidos · 5,1 %</div>
+        <p><b>16 de 315</b> envíos con retraso. Devuelve el denominador junto al porcentaje: un 5,1 % sobre 315 envíos se puede juzgar; el porcentaje solo, no.</p></div>
+    </div>
+  </div>
+
+  <div class="abq">
+    <div class="pregunta">¿Cuánto depende el negocio de mis 10 mejores clientes?</div>
+    <div class="par">
+      <div class="lado bien"><div class="quien">Curado</div><div class="cifra">46,50 %</div>
+        <p>En 2025 los diez mejores clientes aportaron casi la mitad de la venta neta. Calculado con la UC Function <code>venta_neta()</code> — la capa 5 en acción, no una fórmula reescrita a mano.</p></div>
+      <div class="lado bien"><div class="quien">¿Quién es mi mejor vendedor?</div><div class="cifra">Depende del criterio</div>
+        <p>Por venta neta gana <b>Margaret Peacock</b>; por ticket promedio gana <b>Andrew Fuller</b> y Margaret cae al 5.º puesto. El curado <b>declara el criterio y ofrece los otros dos</b> en vez de dar un ganador a secas.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px;padding:24px">
+    <p style="font-size:19px;font-weight:300;letter-spacing:-.3px;line-height:1.45">
+      Las <b style="font-weight:600">21 preguntas</b> de esta consola están ejecutadas contra los spaces reales y transcritas con su respuesta textual en <code>docs/BANCO-PREGUNTAS.md</code>. Saber de antemano qué contesta cada space no es prolijidad: <b style="font-weight:600">es tener un set de oro</b>, que es la capa 7 — la que casi nadie hace.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="mark"><i></i> Manuel Argüelles · AI Engineer</span>
+    <span>Databricks AI Engineer · 8 sesiones · proyecto «Copiloto de Datos»</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(o){
+        o.setAttribute('aria-selected', String(o===t));
+        document.getElementById('p-'+o.dataset.p).hidden = (o!==t);
+      });
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('.copy'); if(!b) return;
+    var txt=b.parentElement.querySelector('pre').innerText;
+    navigator.clipboard.writeText(txt).then(function(){
+      var o=b.textContent; b.textContent='✓ Copiado'; b.classList.add('done');
+      setTimeout(function(){b.textContent=o;b.classList.remove('done')},1400);
+    });
+  });
+
+  var fbtns=[].slice.call(document.querySelectorAll('.fbtn'));
+  fbtns.forEach(function(f){
+    f.addEventListener('click',function(){
+      fbtns.forEach(function(o){o.setAttribute('aria-pressed',String(o===f))});
+      var v=f.dataset.f;
+      [].forEach.call(document.querySelectorAll('.q'),function(q){
+        q.hidden = !(v==='todas' || q.dataset.v===v);
+      });
+    });
+  });
+
+  // ← → para moverse entre pestañas durante la presentación
+  addEventListener('keydown',function(e){
+    if(/input|textarea/i.test((e.target.tagName||''))) return;
+    var i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});
+    if(e.key==='ArrowRight' && i<tabs.length-1) tabs[i+1].click();
+    if(e.key==='ArrowLeft'  && i>0)             tabs[i-1].click();
+  });
+})();
+</script>
+</body>
+</html>
