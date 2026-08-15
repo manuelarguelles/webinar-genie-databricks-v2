@@ -70,12 +70,30 @@ GATE = """
 """
 
 
-def preparar(origen, destino, titulo, reemplazos):
+def quitar_chivatos(html):
+    """Los chivatos ★ son notas de backstage: aparecen al pasar el mouse y filtran
+    la URL del workspace, los 4 space IDs y frases como «NO leas el número de la
+    slide». En la versión publicada no van."""
+    antes = len(html)
+    # el bloque <script> que construye e inyecta los chivatos
+    html = re.sub(r'<script>\s*\(function\(\)\{\s*//\s*─── Plataforma.*?\}\)\(\);\s*</script>',
+                  '<!-- notas del presentador: removidas en la versión publicada -->',
+                  html, flags=re.S)
+    # y su CSS, que ya no tiene a quién aplicar
+    html = re.sub(r'\s*/\* ─── chivato del presentador ─── \*/.*?\.cue-tip code\{[^}]*\}', '',
+                  html, flags=re.S)
+    print(f"   · chivatos removidos: −{antes - len(html):,} bytes")
+    return html
+
+
+def preparar(origen, destino, titulo, reemplazos, sin_chivatos=False):
     html = pathlib.Path(origen).read_text(encoding="utf-8")
     for viejo, nuevo in reemplazos:
         if viejo not in html:
             print(f"   ⚠ no encontrado para reemplazar: {viejo[:60]}")
         html = html.replace(viejo, nuevo)
+    if sin_chivatos:
+        html = quitar_chivatos(html)
     gate = (GATE.replace("__CLAVE__", CLAVE)
                 .replace("__KEY__", KEY)
                 .replace("__TITULO__", titulo))
@@ -95,7 +113,8 @@ print("Preparando deck (reordenado)…")
 preparar(f"{BASE}/deck/webinar-genie-v2-DECK-reordenado.html",
          f"{OUT}/slides-index.html",
          "Slides del webinar · acceso",
-         [("var GUIA='../guia/taller-v2.html';", f"var GUIA='{URL_CONSOLA}';")])
+         [("var GUIA='../guia/taller-v2.html';", f"var GUIA='{URL_CONSOLA}';")],
+         sin_chivatos=True)
 
 print("Preparando consola (guía)…")
 preparar(f"{BASE}/guia/taller-v2.html",
